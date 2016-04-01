@@ -1,14 +1,12 @@
 from flask import Flask
-from flask_restful import Resource, Api
+from flask_restful import Api
+
+from resources.auth import *
 
 app = Flask(__name__)
 api = Api(app)
 
-class test(Resource):
-    def post(self):
-        return {'status': 'success'}
-
-api.add_resource(test, '/test')
+api.add_resource(Test, '/test')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+  app.run(debug=True)
