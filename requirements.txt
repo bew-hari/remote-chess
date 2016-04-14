@@ -1,11 +1,13 @@
 aniso8601==1.1.0
 Flask==0.10.1
+Flask-PyMongo==0.4.1
 Flask-RESTful==0.3.5
 futures==3.0.5
 gunicorn==19.4.5
 itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
+pymongo==3.2.2
 python-chess==0.13.2
 python-dateutil==2.5.2
 pytz==2016.3

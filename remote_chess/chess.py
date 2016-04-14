@@ -1,4 +1,7 @@
 from flask_restful import Resource
+from flask_pymongo import PyMongo
+
+from remote_chess import mongo
 
 class Games(Resource):
 	# create new game
