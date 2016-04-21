@@ -3,7 +3,7 @@ from flask_restful import Resource, reqparse
 from flask_pymongo import PyMongo
 
 from bson.objectid import ObjectId
-from bson.json_util import dumps
+from bson.json_util import dumps, loads
 
 import requests
 import chess
@@ -15,32 +15,54 @@ class Games(Resource):
   def post(self):
     parser = reqparse.RequestParser()
     parser.add_argument('board_id')
-    parser.add_argument('type') # 0 = AI, 1 = human
+    parser.add_argument('type', type=int) # 0 = AI, 1 = human
 
     args = parser.parse_args()
 
-    #if args['type'] == 0:
-      # create game
-    board = chess.Board()
-    game = {
-      '_id': str(ObjectId()),
-      'board': board.fen(),
-      'status': 0,
-      'player_turn': 0,
-      'players': [args['board_id']],
-      'type': args['type']
-    }
-    
-    # save game
-    id = mongo.db.games.save(game)
+    if args['type'] == 0:
+      # TODO: create game with AI
+      pass
 
+    else:
+      game = mongo.db.games.find_one({
+        'type': 1,
+        'players': {'$size': 1}
+      })
+
+      if game:
+        # join game
+        players = game['players']
+        players.append(args['board_id'])
+
+        # update game in database
+        mongo.db.games.update(
+          {'_id': game['_id']}, 
+          {
+            '$set': {
+              'players': players
+            },
+            '$currentDate': {'lastModified': True}
+          }
+        )
+      else:
+        # create game
+        board = chess.Board()
+        game = {
+          '_id': str(ObjectId()),
+          'board': board.fen(),
+          'status': 0,
+          'player_turn': 0,
+          'players': [args['board_id']],
+          'type': args['type']
+        }
+        
+        # save game
+        id = mongo.db.games.save(game)
 
     return {
       'error': None,
       'data': game
     }, 201
-    #else:
-      # TODO: post to other board
 
 
 
@@ -53,7 +75,14 @@ class Game(Resource):
     if game:
       res = {
         'error': None,
-        'data': game
+        'data': {
+          '_id': game['_id'],
+          'board': game['board'],
+          'status': game['status'],
+          'player_turn': game['player_turn'],
+          'players': game['players'],
+          'type': game['type']
+        }
       }
     else:
       res = {
@@ -96,6 +125,17 @@ class Game(Resource):
 
     board.push(move)
 
+
+    if game['type'] == 0:
+      # TODO: generate best move for AI
+      pass
+    else:
+      # switch player turn
+      player_turn = (game['player_turn'] + 1) % 2
+
+      # TODO: post to other board
+
+
     # update game in database
     mongo.db.games.update(
       {'_id': game_id}, 
@@ -108,18 +148,16 @@ class Game(Resource):
       }
     )
 
-    if game['type'] == 0:
-      # TODO: generate best move for AI
-      pass
-    else:
-      # switch player turn
-      player_turn = (board['player_turn'] + 1) % 2
-
-      # TODO: post to other board
-
     return {
       'error': None,
-      'data': game
+      'data': {
+        '_id': game['_id'],
+        'board': board.fen(),
+        'status': game['status'],
+        'player_turn': player_turn,
+        'players': game['players'],
+        'type': game['type']
+      }
     }, 201
 
 
