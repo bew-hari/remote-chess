@@ -8,11 +8,11 @@ class Register(Resource):
   def post(self):
     args = parser.parse_args()
     return {
-      'status': 'success',
+      'error': None,
       'board_id': args['board_id']
     }, 201
 
 class Authenticate(Resource):
   # authenticate board with id
   def post(self):
-    return {'status': 'success'}
+    return {'error': 'None'}
