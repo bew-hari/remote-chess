@@ -7,6 +7,7 @@ from bson.json_util import dumps, loads
 
 import requests
 import chess
+import chess.uci
 
 from remote_chess import mongo
 
@@ -20,12 +21,23 @@ class Games(Resource):
     args = parser.parse_args()
 
     if args['type'] == 0:
-      # TODO: create game with AI
-      pass
+      # create game with AI
+      board = chess.Board()
+      game = {
+        '_id': str(ObjectId()),
+        'board': board.fen(),
+        'status': 1,
+        'players': [args['board_id']],
+        'type': args['type']
+      }
+
+      # save game
+      id = mongo.db.games.save(game)
 
     else:
       game = mongo.db.games.find_one({
         'type': 1,
+        'status': 0,
         'players': {'$size': 1}
       })
 
@@ -39,7 +51,8 @@ class Games(Resource):
           {'_id': game['_id']}, 
           {
             '$set': {
-              'players': players
+              'players': players,
+              'status': 1
             },
             '$currentDate': {'lastModified': True}
           }
@@ -51,7 +64,6 @@ class Games(Resource):
           '_id': str(ObjectId()),
           'board': board.fen(),
           'status': 0,
-          'player_turn': 0,
           'players': [args['board_id']],
           'type': args['type']
         }
@@ -79,7 +91,6 @@ class Game(Resource):
           '_id': game['_id'],
           'board': game['board'],
           'status': game['status'],
-          'player_turn': game['player_turn'],
           'players': game['players'],
           'type': game['type']
         }
@@ -111,7 +122,7 @@ class Game(Resource):
     board = chess.Board(fen=game['board'])
     move = chess.Move.from_uci(args['move'])
 
-    if game['players'][game['player_turn']] != args['board_id']:
+    if board.turn != (args['board_id'] == game['players'][0]):
       return {
         'error': 'Other player\'s turn',
         'data': None
@@ -127,13 +138,17 @@ class Game(Resource):
 
 
     if game['type'] == 0:
-      # TODO: generate best move for AI
-      pass
-    else:
-      # switch player turn
-      player_turn = (game['player_turn'] + 1) % 2
+      engine = chess.uci.popen_engine('stockfish')
+      engine.position(board)
+      move = engine.go(movetime=2000)
 
-      # TODO: post to other board
+      board.push(move.bestmove)
+
+      # TODO: push AI move to player board
+
+    else:
+
+      # TODO: post player move to other board
 
 
     # update game in database
@@ -141,8 +156,7 @@ class Game(Resource):
       {'_id': game_id}, 
       {
         '$set': {
-          'board': board.fen(),
-          'player_turn': player_turn
+          'board': board.fen()
         },
         '$currentDate': {'lastModified': True}
       }
@@ -154,7 +168,6 @@ class Game(Resource):
         '_id': game['_id'],
         'board': board.fen(),
         'status': game['status'],
-        'player_turn': player_turn,
         'players': game['players'],
         'type': game['type']
       }
