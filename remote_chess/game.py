@@ -26,7 +26,7 @@ class Games(Resource):
       game = {
         '_id': str(ObjectId()),
         'board': board.fen(),
-        'status': 1,
+        'status': 2,
         'result': '',
         'players': [args['board_id']],
         'type': args['type']
@@ -35,18 +35,23 @@ class Games(Resource):
       # save game
       id = mongo.db.games.save(game)
 
-      game['turn'] = True
+      # TODO: post back to white for move
+
+      return {
+        'error': None,
+        'data': game
+      }, 201
 
     else:
       game = mongo.db.games.find_one({
         'type': 1,
-        'status': 0,
+        'status': 1,
         'players': {'$size': 1}
       })
 
       if game:
         # join game
-        game['status'] = 1
+        game['status'] = 2
         players = game['players']
         players.append(args['board_id'])
 
@@ -62,10 +67,9 @@ class Games(Resource):
           }
         )
 
-        game['turn'] = True
-        # TODO: post to first board for move
+        # TODO: post to white for move
         
-        game['turn'] = False
+        # TODO: post to black to wait
         
       else:
         # create game
@@ -73,7 +77,7 @@ class Games(Resource):
         game = {
           '_id': str(ObjectId()),
           'board': board.fen(),
-          'status': 0,
+          'status': 1,
           'result': None,
           'players': [args['board_id']],
           'type': args['type']
@@ -82,10 +86,6 @@ class Games(Resource):
         # save game
         id = mongo.db.games.save(game)
 
-        game['turn'] = False
-
-    game['to_move'] = None
-    game['result_text'] = None
     return {
       'error': None,
       'data': game
@@ -135,7 +135,7 @@ class Game(Resource):
     game = mongo.db.games.find_one({
       '_id': args['game_id'],
       'players': args['board_id'],
-      'status': 1
+      'status': 2
     })
 
     if not game:
@@ -161,16 +161,13 @@ class Game(Resource):
       }, 201
 
     board.push(move)
-    turn = False
-    to_move = None
-    result = None
-    text = None
+    to_move = ''
+    result = ''
+    text = ''
 
     if game['type'] == 0:
-      turn = True
-
       if board.is_game_over():
-        game['status'] = 2
+        game['status'] = 3
         result = board.result()
         text = 'You win' if result == '1-0' else 'Draw'
       else:
@@ -182,7 +179,7 @@ class Game(Resource):
         board.push(move.bestmove)
 
         if board.is_game_over():
-          game['status'] = 2
+          game['status'] = 3
           result = board.result()
           text = 'You lose' if result == '0-1' else 'Draw'
 
@@ -190,7 +187,7 @@ class Game(Resource):
 
     else:
       if board.is_game_over():
-        game['status'] = 2
+        game['status'] = 3
         result = board.result()
         if (player == game['players'][0] and result == '1-0') \
             or (player == game['players'][1] and result == '0-1'):
@@ -198,14 +195,8 @@ class Game(Resource):
         else:
           text = 'Draw'
 
-      turn = True
-      to_move = move.uci()
       opponent = game['players'][(player == game['players'][0])]
-      # TODO: post player move to other board
-
-      # reset values for this board
-      turn = False
-      to_move = None
+      # TODO: post player move to other board. use move.uci()
 
     # update game in database
     mongo.db.games.update(
@@ -226,7 +217,7 @@ class Game(Resource):
         '_id': game['_id'],
         'board': board.fen(),
         'status': game['status'],
-        'turn': turn,
+        'turn': 0,
         'result': result,
         'result_text': text,
         'to_move': to_move,
