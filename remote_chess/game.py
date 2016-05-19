@@ -9,6 +9,7 @@ import requests
 import chess
 import chess.uci
 
+from remote_chess import PARTICLE_URI
 from remote_chess.db import mongo
 
 class Games(Resource):
@@ -36,11 +37,7 @@ class Games(Resource):
       id = mongo.db.games.save(game)
 
       # TODO: post back to white for move
-
-      return {
-        'error': None,
-        'data': game
-      }, 201
+      #r = requests.post(PARTICLE_URI + args['board_id'] + '/startGame')
 
     else:
       game = mongo.db.games.find_one({
