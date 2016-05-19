@@ -9,7 +9,7 @@ import requests
 import chess
 import chess.uci
 
-from remote_chess import mongo
+from remote_chess.config import mongo
 
 class Games(Resource):
   # create new game
