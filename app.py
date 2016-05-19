@@ -18,8 +18,8 @@ api.add_resource(Register, '/register')
 api.add_resource(Authenticate, '/auth')
 
 # game resources
-api.add_resource(Games, '/games', methods=['POST'])
-api.add_resource(Game, '/games/<game_id>', methods=['GET', 'POST'])
+api.add_resource(Games, '/create', methods=['POST'])
+api.add_resource(Game, '/games', methods=['GET', 'POST'])
 
 if __name__ == '__main__':
   app.run(debug=True)

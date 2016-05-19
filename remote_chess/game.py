@@ -96,8 +96,12 @@ class Games(Resource):
 
 class Game(Resource):
   # get specific game
-  def get(self, game_id):
-    game = mongo.db.games.find_one({'_id': game_id})
+  def get(self):
+    parser = reqparse.RequestParser()
+    parser.add_argument('game_id')
+    args = parser.parse_args()
+
+    game = mongo.db.games.find_one({'_id': args['game_id']})
     
     if game:
       res = {
@@ -120,15 +124,16 @@ class Game(Resource):
     return res, 201
   
   # modify specific game
-  def post(self, game_id):
+  def post(self):
     parser = reqparse.RequestParser()
     parser.add_argument('board_id')
+    parser.add_argument('game_id')
     parser.add_argument('move')
 
     args = parser.parse_args()
 
     game = mongo.db.games.find_one({
-      '_id': game_id,
+      '_id': args['game_id'],
       'players': args['board_id'],
       'status': 1
     })
@@ -204,7 +209,7 @@ class Game(Resource):
 
     # update game in database
     mongo.db.games.update(
-      {'_id': game_id}, 
+      {'_id': args['game_id']}, 
       {
         '$set': {
           'board': board.fen(),
