@@ -27,12 +27,15 @@ class Games(Resource):
         '_id': str(ObjectId()),
         'board': board.fen(),
         'status': 1,
+        'result': '',
         'players': [args['board_id']],
         'type': args['type']
       }
 
       # save game
       id = mongo.db.games.save(game)
+
+      game['turn'] = True
 
     else:
       game = mongo.db.games.find_one({
@@ -43,6 +46,7 @@ class Games(Resource):
 
       if game:
         # join game
+        game['status'] = 1
         players = game['players']
         players.append(args['board_id'])
 
@@ -52,11 +56,17 @@ class Games(Resource):
           {
             '$set': {
               'players': players,
-              'status': 1
+              'status': game['status']
             },
             '$currentDate': {'lastModified': True}
           }
         )
+
+        game['turn'] = True
+        # TODO: post to first board for move
+        
+        game['turn'] = False
+        
       else:
         # create game
         board = chess.Board()
@@ -64,6 +74,7 @@ class Games(Resource):
           '_id': str(ObjectId()),
           'board': board.fen(),
           'status': 0,
+          'result': None,
           'players': [args['board_id']],
           'type': args['type']
         }
@@ -71,6 +82,10 @@ class Games(Resource):
         # save game
         id = mongo.db.games.save(game)
 
+        game['turn'] = False
+
+    game['to_move'] = None
+    game['result_text'] = None
     return {
       'error': None,
       'data': game
@@ -91,6 +106,7 @@ class Game(Resource):
           '_id': game['_id'],
           'board': game['board'],
           'status': game['status'],
+          'result': game['result'], 
           'players': game['players'],
           'type': game['type']
         }
@@ -111,7 +127,11 @@ class Game(Resource):
 
     args = parser.parse_args()
 
-    game = mongo.db.games.find_one({'_id': game_id})
+    game = mongo.db.games.find_one({
+      '_id': game_id,
+      'players': args['board_id'],
+      'status': 1
+    })
 
     if not game:
       return {
@@ -119,10 +139,11 @@ class Game(Resource):
         'data': None
       }, 201
 
+    player = args['board_id']
     board = chess.Board(fen=game['board'])
     move = chess.Move.from_uci(args['move'])
 
-    if board.turn != (args['board_id'] == game['players'][0]):
+    if board.turn != (player == game['players'][0]):
       return {
         'error': 'Other player\'s turn',
         'data': None
@@ -135,28 +156,60 @@ class Game(Resource):
       }, 201
 
     board.push(move)
-
+    turn = False
+    to_move = None
+    result = None
+    text = None
 
     if game['type'] == 0:
-      engine = chess.uci.popen_engine('stockfish')
-      engine.position(board)
-      move = engine.go(movetime=2000)
+      turn = True
 
-      board.push(move.bestmove)
+      if board.is_game_over():
+        game['status'] = 2
+        result = board.result()
+        text = 'You win' if result == '1-0' else 'Draw'
+      else:
+        # generate move for AI
+        engine = chess.uci.popen_engine('./remote_chess/stockfish-7-x64-linux')
+        engine.position(board)
+        move = engine.go(movetime=2000)
 
-      # TODO: push AI move to player board
+        board.push(move.bestmove)
+
+        if board.is_game_over():
+          game['status'] = 2
+          result = board.result()
+          text = 'You lose' if result == '0-1' else 'Draw'
+
+        to_move = move.bestmove.uci()
 
     else:
+      if board.is_game_over():
+        game['status'] = 2
+        result = board.result()
+        if (player == game['players'][0] and result == '1-0') \
+            or (player == game['players'][1] and result == '0-1'):
+          text = 'You win'
+        else:
+          text = 'Draw'
 
+      turn = True
+      to_move = move.uci()
+      opponent = game['players'][(player == game['players'][0])]
       # TODO: post player move to other board
 
+      # reset values for this board
+      turn = False
+      to_move = None
 
     # update game in database
     mongo.db.games.update(
       {'_id': game_id}, 
       {
         '$set': {
-          'board': board.fen()
+          'board': board.fen(),
+          'status': game['status'],
+          'result': result
         },
         '$currentDate': {'lastModified': True}
       }
@@ -168,9 +221,11 @@ class Game(Resource):
         '_id': game['_id'],
         'board': board.fen(),
         'status': game['status'],
+        'turn': turn,
+        'result': result,
+        'result_text': text,
+        'to_move': to_move,
         'players': game['players'],
         'type': game['type']
       }
     }, 201
-
-
