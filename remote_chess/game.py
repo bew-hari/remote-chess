@@ -9,8 +9,11 @@ import requests
 import chess
 import chess.uci
 
-from remote_chess import PARTICLE_URI, PHOTON_ACCESS_TOKEN
-from remote_chess.db import mongo
+from remote_chess import app
+from remote_chess.config import mongo
+
+PARTICLE_URI = app.config['PARTICLE_URI']
+PHOTON_ACCESS_TOKEN = app.config['PHOTON_ACCESS_TOKEN']
 
 class Games(Resource):
   # create new game

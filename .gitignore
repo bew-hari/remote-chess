@@ -12,5 +12,5 @@ _mailinglist
 .cache/
 .idea/
 
-# exclude db config
-remote_chess/db.py
+# exclude config
+remote_chess/config.py
