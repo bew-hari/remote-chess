@@ -9,7 +9,7 @@ import requests
 import chess
 import chess.uci
 
-from remote_chess import PARTICLE_URI
+from remote_chess import PARTICLE_URI, PHOTON_ACCESS_TOKEN
 from remote_chess.db import mongo
 
 class Games(Resource):
@@ -37,7 +37,14 @@ class Games(Resource):
       id = mongo.db.games.save(game)
 
       # TODO: post back to white for move
-      #r = requests.post(PARTICLE_URI + args['board_id'] + '/startGame')
+      command = '~'.join([game['_id'], 'AI', '1', '0']) + '~'
+      r = requests.post(
+        PARTICLE_URI + args['board_id'] + '/startGame', 
+        {
+          'access_token': PHOTON_ACCESS_TOKEN, 
+          'args': 'command=' + command
+        }
+      )
 
     else:
       game = mongo.db.games.find_one({
@@ -65,8 +72,24 @@ class Games(Resource):
         )
 
         # TODO: post to white for move
+        command = '~'.join([game['_id'], players[1], '1', '0']) + '~'
+        r = requests.post(
+          PARTICLE_URI + players[0] + '/startGame', 
+          {
+            'access_token': PHOTON_ACCESS_TOKEN, 
+            'args': 'command=' + command
+          }
+        )
         
         # TODO: post to black to wait
+        command = '~'.join([game['_id'], players[0], '0', '1']) + '~'
+        r = requests.post(
+          PARTICLE_URI + players[1] + '/startGame', 
+          {
+            'access_token': PHOTON_ACCESS_TOKEN, 
+            'args': 'command=' + command
+          }
+        )
         
       else:
         # create game
@@ -158,6 +181,9 @@ class Game(Resource):
       }, 201
 
     board.push(move)
+    
+    # possibly needed for race conditions when playing AI
+    #status = game['status']
     to_move = ''
     result = ''
     text = ''
@@ -171,16 +197,26 @@ class Game(Resource):
         # generate move for AI
         engine = chess.uci.popen_engine('./remote_chess/stockfish-7-x64-linux')
         engine.position(board)
-        move = engine.go(movetime=2000)
+        ai_move = engine.go(movetime=2000)
 
-        board.push(move.bestmove)
+        board.push(ai_move.bestmove)
 
         if board.is_game_over():
           game['status'] = 3
           result = board.result()
           text = 'You lose' if result == '0-1' else 'Draw'
 
-        to_move = move.bestmove.uci()
+        to_move = ai_move.bestmove.uci()
+
+        # TODO: post AI move to player board
+        command = '~'.join([to_move, game['status'], '1']) + '~'
+        r = requests.post(
+          PARTICLE_URI + args['board_id'] + '/movePiece', 
+          {
+            'access_token': PHOTON_ACCESS_TOKEN, 
+            'args': 'command=' + command
+          }
+        )
 
     else:
       if board.is_game_over():
@@ -193,7 +229,16 @@ class Game(Resource):
           text = 'Draw'
 
       opponent = game['players'][(player == game['players'][0])]
+      
       # TODO: post player move to other board. use move.uci()
+      command = '~'.join([move.uci(), game['status'], '1']) + '~'
+      r = requests.post(
+        PARTICLE_URI + opponent + '/movePiece', 
+        {
+          'access_token': PHOTON_ACCESS_TOKEN, 
+          'args': 'command=' + command
+        }
+      )
 
     # update game in database
     mongo.db.games.update(
