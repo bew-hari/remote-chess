@@ -155,7 +155,6 @@ class Game(Resource):
     parser.add_argument('capture')
 
     args = parser.parse_args()
-    print args
 
     game = mongo.db.games.find_one({
       '_id': args['game_id'],
@@ -172,7 +171,6 @@ class Game(Resource):
     player = args['board_id']
     board = chess.Board(fen=game['board'])
     move = chess.Move.from_uci(to_uci(board, args['move'], args['capture']))
-    print move.uci()
 
     if board.turn != (player == game['players'][0]):
       return {
