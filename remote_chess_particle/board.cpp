@@ -59,20 +59,38 @@ void Board::requestGame(int gameType) {
   }
 
   // Request a game
-  Particle.publish("create_game", "{ \"board_id\": \"" + _boardID + "\", \"type\": \"" + String(gameType) + "\"}", PRIVATE);
+  Particle.publish(
+    "create_game",
+    "{ \"board_id\": \"" + _boardID + "\", \"type\": \"" + String(gameType) + "\"}",
+    PRIVATE
+  );
+
+  // set state to waiting
   _state = 1;
 
   // Wait 10 seconds
   delay(10000);
 }
 
-void Board::readConfiguration() {}
+String Board::readConfiguration() {}
 
-void Board::readCapture() {}
+void Board::readCapture() {
+  _capture = readConfiguration();
+}
 
-void Board::readMove() {}
+void Board::sendMove() {
+  _move = readConfiguration();
 
-void Board::sendMove() {}
+  // Send move
+  Particle.publish(
+    "make_move",
+    "{ \"board_id\": \"" + _boardID + "\", \"game_id\": \"" + _gameID + "\", \"move\": \"" + _move + "\", \"capture\": \"" + _capture + "\"}",
+    PRIVATE
+  );
+
+  // reset capture
+  _capture = "";
+}
 
 /*
 String Board::getUCIMove() {

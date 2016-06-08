@@ -48,12 +48,12 @@ class Board {
 
     void requestGame(int gameType);
 
-    void readConfiguration();
+    String readConfiguration();
 
     void readCapture();
-    void readMove();
+
     void sendMove();
-    
+
     //String getUCIMove();
     //String toSquare(int index);
 };
