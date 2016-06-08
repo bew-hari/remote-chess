@@ -1,9 +1,5 @@
+#include "globals.h"
 #include "sensors.h"
-#include "ui.h"
-
-int latchPin = A0;
-int dataPin = A2;
-int clockPin = A1;
 
 void setupSensors() {
   pinMode(latchPin, OUTPUT);

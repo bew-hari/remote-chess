@@ -6,20 +6,16 @@ Some comment here about the project
 
 ------------------------------------------*/
 
-#include "Serial_LCD_SparkFun.h"
-#include "board.h"
+#include "globals.h"
 #include "ui.h"
 #include "sensors.h"
 
-extern Serial_LCD_SparkFun lcd = Serial_LCD_SparkFun();
-Board board;
-
 void setup() {
-
     // Setup pins
-    lcd.clear();
     setupButtonInterrupts();
     setupSensors();
+
+    board.clearLCD();
 
     // Setup cloud functions
     Particle.function("startGame", startGame);
@@ -31,7 +27,7 @@ void setup() {
 
 void loop() {
     // Refresh LCD
-    lcd.clear();
+    board.clearLCD();
 
     /*
     Serial1.print(getMenuString());
@@ -109,7 +105,7 @@ int startGame(String command) {
 
     int state = 2;
 
-    board.init(gameID, opponentID, state, turn, color);
+    board.startGame(gameID, opponentID, state, turn, color);
 
     // Notify player of game
     // TODO: print to LCD

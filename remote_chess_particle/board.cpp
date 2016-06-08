@@ -9,9 +9,11 @@ Board::Board() {
     _gameType = 0;
     _color = false;
     _turn = false;
+
+    _lcd = Serial_LCD_SparkFun();
 }
 
-void Board::init(const String& gameID, const String& opponentID, int state, bool color, bool turn) {
+void Board::startGame(const String& gameID, const String& opponentID, int state, bool color, bool turn) {
     _gameID = String(gameID);
     _opponentID = String(opponentID);
     _state = state;
@@ -28,7 +30,7 @@ void Board::reset() {
     _state = 0;
     _color = false;
     _turn = false;
-    
+
     _before = LongInt(0, 0);
     _after = LongInt(0, 0);
 }
@@ -45,31 +47,27 @@ void Board::setGameType(int gameType) { _gameType = gameType; }
 bool Board::isTurn() { return _turn; }
 void Board::setTurn(bool turn) { _turn = turn; }
 
-void Board::read(bool before) {
-    if (before) {
-        
-    } else {
-        
-    }
-}
+void Board::clearLCD() { _lcd.clear(); }
+
+void Board::readReedSwitches() {}
 
 String Board::getUCIMove() {
     String move = "";
     LongInt diff = _before ^ _after;
-    
+
     // Get indices of set bits
     int* indices = diff.locateSetBits();
     int count = indices[64];
-    
+
     // Convert to UCI based on type of move
     switch(count) {
         case 1: // capturing pieces
             break;
-            
+
         case 2: // moving pieces
         {
             int source = -1, dest = -1;
-            
+
             if (_before.isSet(indices[0])) {
                 // Moved from index 0 to 1
                 source = 0;
@@ -79,22 +77,22 @@ String Board::getUCIMove() {
                 source = 1;
                 dest = 0;
             }
-            
+
             move = toSquare(indices[source]) + toSquare(indices[dest]);
             break;
         }
-        
+
         case 3: // capturing en passant?
             break;
-        
+
         case 4: // castling
             break;
-            
+
         default: // WTF?
             return "????";
             break;
     }
-    
+
     return move;
 }
 
@@ -102,9 +100,9 @@ String Board::toSquare(int index) {
     if (index >= 64 ) {
         return "??";
     }
-    
+
     int row = index / 8;
     int col = index % 8;
-    
+
     return String("a" + col) + String("0" + row);
 }

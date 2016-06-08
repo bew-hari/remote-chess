@@ -1,16 +1,17 @@
+#include "globals.h"
 #include "ui.h"
 
 void setupButtonInterrupts(){
-  pinMode(D7,INPUT_PULLDOWN);
+  pinMode(upPin, INPUT_PULLDOWN);
   attachInterrupt(D7, upButton, RISING);
 
-  pinMode(D6,INPUT_PULLDOWN);
+  pinMode(backPin, INPUT_PULLDOWN);
   attachInterrupt(D6, backButton, RISING);
 
-  pinMode(D5,INPUT_PULLDOWN);
+  pinMode(downPin, INPUT_PULLDOWN);
   attachInterrupt(D5, downButton, RISING);
 
-  pinMode(D4,INPUT_PULLDOWN);
+  pinMode(nextPin, INPUT_PULLDOWN);
   attachInterrupt(D4, nextButton, RISING);
 }
 
