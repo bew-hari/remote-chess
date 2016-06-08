@@ -30,7 +30,7 @@ class Games(Resource):
       game = {
         '_id': str(ObjectId()),
         'board': board.fen(),
-        'status': 2,
+        'state': 2,
         'result': '',
         'players': [args['board_id']],
         'type': args['type']
@@ -52,13 +52,13 @@ class Games(Resource):
     else:
       game = mongo.db.games.find_one({
         'type': 1,
-        'status': 1,
+        'state': 1,
         'players': {'$size': 1}
       })
 
       if game:
         # join game
-        game['status'] = 2
+        game['state'] = 2
         players = game['players']
         players.append(args['board_id'])
 
@@ -68,7 +68,7 @@ class Games(Resource):
           {
             '$set': {
               'players': players,
-              'status': game['status']
+              'state': game['state']
             },
             '$currentDate': {'lastModified': True}
           }
@@ -100,7 +100,7 @@ class Games(Resource):
         game = {
           '_id': str(ObjectId()),
           'board': board.fen(),
-          'status': 1,
+          'state': 1,
           'result': None,
           'players': [args['board_id']],
           'type': args['type']
@@ -132,7 +132,7 @@ class Game(Resource):
         'data': {
           '_id': game['_id'],
           'board': game['board'],
-          'status': game['status'],
+          'state': game['state'],
           'result': game['result'], 
           'players': game['players'],
           'type': game['type']
@@ -151,14 +151,14 @@ class Game(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('board_id')
     parser.add_argument('game_id')
-    parser.add_argument('move')
+    parser.add_argument('board')
 
     args = parser.parse_args()
 
     game = mongo.db.games.find_one({
       '_id': args['game_id'],
       'players': args['board_id'],
-      'status': 2
+      'state': 2
     })
 
     if not game:
@@ -169,7 +169,7 @@ class Game(Resource):
 
     player = args['board_id']
     board = chess.Board(fen=game['board'])
-    move = chess.Move.from_uci(args['move'])
+    move = args['board'] #chess.Move.from_uci(args['move'])
 
     if board.turn != (player == game['players'][0]):
       return {
@@ -186,14 +186,14 @@ class Game(Resource):
     board.push(move)
     
     # possibly needed for race conditions when playing AI
-    #status = game['status']
+    #state = game['state']
     to_move = ''
     result = ''
     text = ''
 
     if game['type'] == 0:
       if board.is_game_over():
-        game['status'] = 3
+        game['state'] = 3
         result = board.result()
         text = 'You win' if result == '1-0' else 'Draw'
       else:
@@ -205,14 +205,14 @@ class Game(Resource):
         board.push(ai_move.bestmove)
 
         if board.is_game_over():
-          game['status'] = 3
+          game['state'] = 3
           result = board.result()
           text = 'You lose' if result == '0-1' else 'Draw'
 
         to_move = ai_move.bestmove.uci()
 
         # TODO: post AI move to player board
-        command = '~'.join([to_move, game['status'], '1']) + '~'
+        command = '~'.join([to_move, game['state'], '1']) + '~'
         r = requests.post(
           PARTICLE_URI + args['board_id'] + '/movePiece', 
           {
@@ -223,7 +223,7 @@ class Game(Resource):
 
     else:
       if board.is_game_over():
-        game['status'] = 3
+        game['state'] = 3
         result = board.result()
         if (player == game['players'][0] and result == '1-0') \
             or (player == game['players'][1] and result == '0-1'):
@@ -234,7 +234,7 @@ class Game(Resource):
       opponent = game['players'][(player == game['players'][0])]
       
       # TODO: post player move to other board. use move.uci()
-      command = '~'.join([move.uci(), game['status'], '1']) + '~'
+      command = '~'.join([move.uci(), game['state'], '1']) + '~'
       r = requests.post(
         PARTICLE_URI + opponent + '/movePiece', 
         {
@@ -249,7 +249,7 @@ class Game(Resource):
       {
         '$set': {
           'board': board.fen(),
-          'status': game['status'],
+          'state': game['state'],
           'result': result
         },
         '$currentDate': {'lastModified': True}
@@ -261,7 +261,7 @@ class Game(Resource):
       'data': {
         '_id': game['_id'],
         'board': board.fen(),
-        'status': game['status'],
+        'state': game['state'],
         'turn': 0,
         'result': result,
         'result_text': text,
@@ -270,3 +270,143 @@ class Game(Resource):
         'type': game['type']
       }
     }, 201
+
+
+def to_UCI_move(board, move, capture=None):
+  before = ''
+
+  for i in xrange(64):
+    if board.piece_at(i):
+      before += '1'
+    else:
+      before += '0'
+
+  diff = '{:064b}'.format(int(before, base=2) ^ int(move, base=2))
+
+  if capture:
+    # find index of removed piece
+    c_diff = '{:064b}'.format(int(before, base=2) ^ int(capture, base=2))
+
+    count = 0
+    for i in xrange(64):
+      if c_diff[i] == '1' and capture[i] == '0':
+        index = i
+        count += 1
+
+    # can only capture exactly one piece
+    if count != 1:
+      return '????'
+
+    c_rank = index / 8
+    c_file = index % 8
+    c_dest = chr(ord('a') + c_file) + chr(ord('1') + c_rank)
+
+    # find capturing piece
+    m_diff = '{:064b}'.format(int(capture, base=2) ^ int(move, base=2))
+    
+    source = -1
+    dest = -1
+    count = 0
+    for i in xrange(64):
+      if m_diff[i] == '1':
+        if capture[i] == '1' and move[i] == '0':
+          source = i
+        elif capture[i] == '0' and move[i] == '1':
+          dest = i
+
+        count += 1
+
+    # can only move a single piece
+    if count != 2:
+      return '????'
+
+    m_source_rank = source / 8
+    m_source_file = source % 8
+    m_source = chr(ord('a') + m_source_file) + chr(ord('1') + m_source_rank)
+
+    m_dest_rank = dest / 8
+    m_dest_file = dest % 8
+    m_dest = chr(ord('a') + m_dest_file) + chr(ord('1') + m_dest_rank)
+
+    if m_dest_rank == c_rank and m_dest_file == c_file:
+      return m_source + c_dest
+    elif (m_source_rank == c_rank and 
+          abs(m_source_file - c_file) == 1 and 
+          m_dest_file == c_file and 
+          abs(m_dest_rank - c_rank) == 1):
+      return m_source + m_dest
+    else:   # invalid capture
+      return '????'
+
+  else:
+    m_diff = '{:064b}'.format(int(before, base=2) ^ int(move, base=2))
+
+    indices = []
+    for i in xrange(64):
+      if m_diff[i] == '1':
+        indices.append(i)
+
+    # regular move
+    if len(indices) == 2:
+      source = -1
+      dest = -1
+      if before[indices[0]] == '1' and move[indices[1]] == '1':
+        source = indices[0]
+        dest = indices[1]
+      elif before[indices[1]] == '1' and move[indices[0]] == '1':
+        source = indices[1]
+        dest = indices[0]
+      else:
+        return '????'
+
+      m_source_rank = source / 8
+      m_source_file = source % 8
+      m_source = chr(ord('a') + m_source_file) + chr(ord('1') + m_source_rank)
+
+      m_dest_rank = dest / 8
+      m_dest_file = dest % 8
+      m_dest = chr(ord('a') + m_dest_file) + chr(ord('1') + m_dest_rank)
+
+      return m_source + m_dest
+
+    # castling
+    elif len(indices) == 4:
+      indices = sorted(indices)
+
+      ranks = [i/8 for i in indices]
+      files = [i%8 for i in indices]
+
+      # not in the bottom or top ranks
+      if any(r != 0 for r in ranks) or any(r != 7 for r in ranks):
+        return '????'
+
+      # not in castling format
+      if (before[indices[0]] != '1' or
+          before[indices[4]] != '1' or 
+          move[indices[2]] != '1' or 
+          move[indices[3]] != '1'):
+        return '????'
+
+      source = -1
+      dest = -1
+      if files == [0,2,3,4]:    # queen side castling
+        source = indices[3]
+        dest = indices[1]
+      elif files == [4,5,6,7]:  # king side castling
+        source = indices[0]
+        dest = indices[2]
+      else:
+        return '????'
+      
+      m_source_rank = source / 8
+      m_source_file = source % 8
+      m_source = chr(ord('a') + m_source_file) + chr(ord('1') + m_source_rank)
+
+      m_dest_rank = dest / 8
+      m_dest_file = dest % 8
+      m_dest = chr(ord('a') + m_dest_file) + chr(ord('1') + m_dest_rank)
+
+      return m_source + m_dest
+
+    else:
+      return '????'
