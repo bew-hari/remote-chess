@@ -155,6 +155,7 @@ class Game(Resource):
     parser.add_argument('capture')
 
     args = parser.parse_args()
+    print args
 
     game = mongo.db.games.find_one({
       '_id': args['game_id'],
