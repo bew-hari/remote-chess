@@ -151,7 +151,8 @@ class Game(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('board_id')
     parser.add_argument('game_id')
-    parser.add_argument('board')
+    parser.add_argument('move')
+    parser.add_argument('capture')
 
     args = parser.parse_args()
 
@@ -169,7 +170,7 @@ class Game(Resource):
 
     player = args['board_id']
     board = chess.Board(fen=game['board'])
-    move = args['board'] #chess.Move.from_uci(args['move'])
+    move = chess.Move.from_uci(to_uci(board, args['move'], args['capture']))
 
     if board.turn != (player == game['players'][0]):
       return {
@@ -272,7 +273,7 @@ class Game(Resource):
     }, 201
 
 
-def to_UCI_move(board, move, capture=None):
+def to_uci(board, move, capture=None):
   before = ''
 
   for i in xrange(64):
