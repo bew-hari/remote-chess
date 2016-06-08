@@ -24,9 +24,9 @@ class Board {
     Serial_LCD_SparkFun _lcd;
 
   public:
-    Board();
+    Board(String boardID);
 
-    void startGame(const String& gameID, const String& opponentID, int state, bool color, bool turn);
+    void set(const String& gameID, const String& opponentID, int state, bool color, bool turn);
     void reset();
 
     String getBoardID();
@@ -42,6 +42,8 @@ class Board {
     void setTurn(bool turn);
 
     void clearLCD();
+
+    void requestGame(int gameType);
 
     void readReedSwitches();
     String getUCIMove();

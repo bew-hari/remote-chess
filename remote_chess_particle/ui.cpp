@@ -16,6 +16,13 @@ void setupButtonInterrupts(){
 }
 
 void upButton() {}
-void downButton() {}
+
+void downButton() {
+  // default to AI game
+  int gameType = 0;
+
+  board.requestGame(gameType);
+}
+
 void backButton() {}
 void nextButton() {}

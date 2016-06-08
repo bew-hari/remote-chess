@@ -1,7 +1,7 @@
 #include "board.h"
 
-Board::Board() {
-    _boardID = "23001f001747343337363432";  // board identifier
+Board::Board(String boardID) {
+    _boardID = boardID;  // board identifier
     _gameID = "";
     _opponentID = "";
     _lastMove = "";
@@ -13,7 +13,7 @@ Board::Board() {
     _lcd = Serial_LCD_SparkFun();
 }
 
-void Board::startGame(const String& gameID, const String& opponentID, int state, bool color, bool turn) {
+void Board::set(const String& gameID, const String& opponentID, int state, bool color, bool turn) {
     _gameID = String(gameID);
     _opponentID = String(opponentID);
     _state = state;
@@ -48,6 +48,20 @@ bool Board::isTurn() { return _turn; }
 void Board::setTurn(bool turn) { _turn = turn; }
 
 void Board::clearLCD() { _lcd.clear(); }
+
+void Board::requestGame(int gameType) {
+  // board is not idle
+  if (_state != 0) {
+    return;
+  }
+
+  // Request a game
+  Particle.publish("create_game", "{ \"board_id\": \"" + _boardID + "\", \"type\": \"" + String(gameType) + "\"}", PRIVATE);
+  _state = 1;
+
+  // Wait 10 seconds
+  delay(10000);
+}
 
 void Board::readReedSwitches() {}
 

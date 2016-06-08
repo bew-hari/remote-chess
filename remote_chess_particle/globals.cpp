@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "board.h"
 
-Board board = Board();
+Board board = Board("23001f001747343337363432");
 
 // pins
 int latchPin = A0;

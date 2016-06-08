@@ -48,8 +48,8 @@ void loop() {
         Particle.publish("create_game", "{ \"board_id\": \"" + board.getBoardID() + "\", \"type\": \"" + String(gameType) + "\"}", PRIVATE);
         board.setState(1);
 
-        // Wait 30 seconds
-        delay(30000);
+        // Wait 10 seconds
+        delay(10000);
     }
 
     // Read board configuration before move
@@ -105,7 +105,7 @@ int startGame(String command) {
 
     int state = 2;
 
-    board.startGame(gameID, opponentID, state, turn, color);
+    board.set(gameID, opponentID, state, turn, color);
 
     // Notify player of game
     // TODO: print to LCD
