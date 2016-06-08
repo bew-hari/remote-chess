@@ -15,8 +15,7 @@ void setupButtonInterrupts(){
   attachInterrupt(D4, nextButton, RISING);
 }
 
-void upButton() {}
-
+// request game
 void downButton() {
   // default to AI game
   int gameType = 0;
@@ -25,4 +24,13 @@ void downButton() {
 }
 
 void backButton() {}
-void nextButton() {}
+
+// capture piece
+void upButton() {
+  board.readCapture();
+}
+
+// move piece
+void nextButton() {
+  board.sendMove();
+}

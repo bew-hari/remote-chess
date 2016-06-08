@@ -10,6 +10,9 @@ Board::Board(String boardID) {
     _color = false;
     _turn = false;
 
+    _capture = "";
+    _move = "";
+
     _lcd = Serial_LCD_SparkFun();
 }
 
@@ -31,8 +34,8 @@ void Board::reset() {
     _color = false;
     _turn = false;
 
-    _before = LongInt(0, 0);
-    _after = LongInt(0, 0);
+    //_before = LongInt(0, 0);
+    //_after = LongInt(0, 0);
 }
 
 String Board::getBoardID() { return _boardID; }
@@ -63,8 +66,15 @@ void Board::requestGame(int gameType) {
   delay(10000);
 }
 
-void Board::readReedSwitches() {}
+void Board::readConfiguration() {}
 
+void Board::readCapture() {}
+
+void Board::readMove() {}
+
+void Board::sendMove() {}
+
+/*
 String Board::getUCIMove() {
     String move = "";
     LongInt diff = _before ^ _after;
@@ -120,3 +130,4 @@ String Board::toSquare(int index) {
 
     return String("a" + col) + String("0" + row);
 }
+*/

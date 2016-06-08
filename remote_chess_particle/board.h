@@ -2,15 +2,15 @@
 #define BOARD_H
 
 #include "application.h"
-#include "long_int.h"
+//#include "long_int.h"
 #include "Serial_LCD_SparkFun.h"
 #include "sensors.h"
 #include "ui.h"
 
 class Board {
   private:
-    LongInt _before;
-    LongInt _after;
+    //LongInt _before;
+    //LongInt _after;
 
     String _boardID;        // board identifier
     String _gameID;         // game identifier, set when game is started
@@ -20,6 +20,9 @@ class Board {
     int _gameType;          // 0 for AI, 1 for human
     bool _color;            // 0 for white, 1 for black
     bool _turn;             // 1 if currently this board's turn to move, 0 otherwise
+
+    String _move;
+    String _capture;
 
     Serial_LCD_SparkFun _lcd;
 
@@ -45,9 +48,14 @@ class Board {
 
     void requestGame(int gameType);
 
-    void readReedSwitches();
-    String getUCIMove();
-    String toSquare(int index);
+    void readConfiguration();
+
+    void readCapture();
+    void readMove();
+    void sendMove();
+    
+    //String getUCIMove();
+    //String toSquare(int index);
 };
 
 #endif
