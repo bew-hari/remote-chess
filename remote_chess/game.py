@@ -172,6 +172,7 @@ class Game(Resource):
     player = args['board_id']
     board = chess.Board(fen=game['board'])
     move = chess.Move.from_uci(to_uci(board, args['move'], args['capture']))
+    print move.uci()
 
     if board.turn != (player == game['players'][0]):
       return {
@@ -212,7 +213,7 @@ class Game(Resource):
           text = 'You lose' if result == '0-1' else 'Draw'
 
         to_move = ai_move.bestmove.uci()
-
+        """
         # TODO: post AI move to player board
         command = '~'.join([to_move, game['state'], '1']) + '~'
         r = requests.post(
@@ -222,6 +223,7 @@ class Game(Resource):
             'args': 'command=' + command
           }
         )
+        """
 
     else:
       if board.is_game_over():
@@ -234,7 +236,7 @@ class Game(Resource):
           text = 'Draw'
 
       opponent = game['players'][(player == game['players'][0])]
-      
+      """
       # TODO: post player move to other board. use move.uci()
       command = '~'.join([move.uci(), game['state'], '1']) + '~'
       r = requests.post(
@@ -244,6 +246,7 @@ class Game(Resource):
           'args': 'command=' + command
         }
       )
+      """
 
     # update game in database
     mongo.db.games.update(
