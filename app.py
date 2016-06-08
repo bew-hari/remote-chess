@@ -6,11 +6,6 @@ from flask_restful import Api
 from remote_chess.auth import *
 from remote_chess.game import *
 
-#app = Flask(__name__)
-#app.config['MONGO_DBNAME'] = 'remote_chess'
-
-#mongo = PyMongo(app, config_prefix='MONGO')
-
 api = Api(app)
 
 # auth resources
