@@ -188,7 +188,7 @@ class Game(Resource):
     args = json.loads(parser.parse_args()['data'])
     print 'args: ' + args
     """
-
+    args={}
     print 'parsing. not actually. they are hardcoded'
     args['game_id'] = '26003e000447343339373536'
     args['game_id'] = '5759beef1fa783000a9870ab'
