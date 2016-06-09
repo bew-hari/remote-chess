@@ -18,8 +18,8 @@ void setup() {
     board.clearLCD();
 
     // Setup cloud functions
-    //Particle.function("startGame", startGame);
-    //Particle.function("movePiece", moveOpponentPiece);
+    Particle.function("startGame", startGame);
+    Particle.function("movePiece", moveOpponentPiece);
 
     // Listen to webhook response
     //Particle.subscribe("hook-response/make_move", myMoveHandler , MY_DEVICES);
@@ -151,12 +151,10 @@ int startGame(String command) {
     bool turn = atoi(strtok(NULL, "~"));
     bool color = atoi(strtok(NULL, "~"));
 
-    int state = 2;
+    board.set(gameID);
 
-    board.set(gameID, opponentID, state, turn, color);
-
-    // Notify player of game
-    // TODO: print to LCD
+    // wait for player's move
+    board.setState(WAIT_FOR_MOVE);
 
     return 0;
 }

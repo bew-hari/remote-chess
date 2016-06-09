@@ -40,7 +40,7 @@ class Board {
 
     Board(String boardID);
 
-    void set(const String& gameID, const String& opponentID, int gameState, bool color, bool turn);
+    void set(const String& gameID);
     void reset();
 
     String getBoardID();

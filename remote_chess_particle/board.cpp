@@ -19,12 +19,12 @@ Board::Board(String boardID) {
     m_first = true;
 }
 
-void Board::set(const String& gameID, const String& opponentID, int gameState, bool color, bool turn) {
+void Board::set(const String& gameID) {
     _gameID = String(gameID);
-    _opponentID = String(opponentID);
-    _gameState = gameState;
-    _color = color;
-    _turn = turn;
+    //_opponentID = String(opponentID);
+    //_gameState = gameState;
+    //_color = color;
+    //_turn = turn;
 }
 
 void Board::reset() {
