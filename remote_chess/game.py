@@ -254,8 +254,10 @@ class Game(Resource):
         'data': None
       }, 201
 
+    print 'Move ' + move
     board.push(move)
     result = ''
+    print board
 
     if board.is_game_over():
       game['state'] = 3
@@ -276,8 +278,11 @@ class Game(Resource):
     else:
       # generate move for AI
       engine = chess.uci.popen_engine('./remote_chess/stockfish-7-x64-linux')
+      print 'open engine'
       engine.position(board)
+      print 'set board position'
       ai_move = engine.go(movetime=2000)
+      print 'generate ai move'
 
       board.push(ai_move.bestmove)
       print ai_move.bestmove
