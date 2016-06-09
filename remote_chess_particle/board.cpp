@@ -11,6 +11,7 @@ Board::Board(const String& boardID) {
     _gameType = 0;
     _color = false;
     _turn = false;
+    _error = 0;
 
     _capture = "";
     _move = "";
@@ -31,6 +32,8 @@ void Board::reset() {
     _gameType = 0;
     _color = false;
     _turn = false;
+
+    _error = 0;
 
     m_first = true;
 }
@@ -62,6 +65,9 @@ String Board::getLastOppMove() { return _lastOppMove; }
 void Board::setLastOppMove(const String& move) {
   _lastOppMove = String(move);
 }
+
+int Board::getErrorCode() { return _error; }
+void Board::setErrorCode(int error) { _error = error; }
 
 void Board::clearLCD() { _lcd.clear(); }
 

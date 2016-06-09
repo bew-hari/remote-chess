@@ -90,6 +90,37 @@ void loop() {
         }
         break;
 
+      case MOVE_ERROR:
+        if (board.m_first) {
+          board.clearLCD();
+
+          switch(board.getErrorCode()) {
+            case 1:
+              // other player's turn
+              board.print("Other player's\nturn\n");
+              break;
+
+            case 2:
+              board.print("Invalid move\nTry again\n");
+              break;
+
+            case 3:
+              board.print("Illegal move\nTry again\n");
+              break;
+
+            default:
+              break;
+          }
+          board.print(String("Opponent's move\n" + board.getLastOppMove() + "\n"));
+          board.m_first = false;
+        }
+
+        delay(5000);
+
+        board.changeState(WAIT_FOR_MOVE);
+
+        break;
+
       case DEBUG_SENSORS:
       {
         startRead();
@@ -164,19 +195,11 @@ int moveOpponentPiece(String command) {
 }
 
 int handleError(String command) {
-  if (command.equals("0")) {
-    // other player's turn
-    board.clearLCD();
-    board.print("Other player's\nturn\n");
-  } else if (command.equals("1")) {
-    // unrecognized move
-    board.clearLCD();
-    board.print("Invalid move\nTry again\n");
-  } else if (command.equals("2")) {
-    // illegal move
-    board.clearLCD();
-    board.print("Illegal move\nTry again\n");
-  }
+  // save the error code
+  board.setErrorCode(atoi(command));
+
+  // switch to error state
+  board.changeState(MOVE_ERROR);
 }
 
 int gameOver(String command) {

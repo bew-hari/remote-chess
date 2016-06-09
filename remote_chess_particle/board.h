@@ -16,6 +16,7 @@ enum State {
   WAIT_FOR_SERVER,
   MOVE_OPP_PIECE,
   GAME_OVER,
+  MOVE_ERROR,
   DEBUG_SENSORS
 };
 
@@ -31,6 +32,8 @@ class Board {
     int _gameType;          // 0 for AI, 1 for human
     bool _color;            // 0 for white, 1 for black
     bool _turn;             // 1 if currently this board's turn to move, 0 otherwise
+
+    int _error;
 
     String _move;
     String _capture;
@@ -64,6 +67,9 @@ class Board {
 
     String getLastOppMove();
     void setLastOppMove(const String& move);
+
+    int getErrorCode();
+    void setErrorCode(int error);
 
     void clearLCD();
 

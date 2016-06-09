@@ -214,7 +214,7 @@ class Game(Resource):
 
     if board.turn != (player == game['players'][0]):
       print 'other players turn'
-      command = '0'
+      command = '1'
       headers = {'content-type': 'application/x-www-form-urlencoded'}
       r = requests.post(
         PARTICLE_URI + args['board_id'] + '/error', 
@@ -235,7 +235,7 @@ class Game(Resource):
 
     if not uci_move:
       print 'No move found'
-      command = '1'
+      command = '2'
       headers = {'content-type': 'application/x-www-form-urlencoded'}
       r = requests.post(
         PARTICLE_URI + args['board_id'] + '/error', 
@@ -256,7 +256,7 @@ class Game(Resource):
 
     if move not in board.legal_moves:
       print 'Illegal move'
-      command = '2'
+      command = '3'
       headers = {'content-type': 'application/x-www-form-urlencoded'}
       r = requests.post(
         PARTICLE_URI + args['board_id'] + '/error', 
