@@ -178,18 +178,23 @@ class Game(Resource):
   
   # modify specific game
   def post(self):
+    """
     print 'Got move. Parsing'
-    sys.stdout.flush()
     parser = reqparse.RequestParser()
     print 'parser'
-    sys.stdout.flush()
     parser.add_argument('data')
     print 'parser'
-    sys.stdout.flush()
 
     args = json.loads(parser.parse_args()['data'])
     print 'args: ' + args
-    sys.stdout.flush()
+    """
+
+    print 'parsing. not actually. they are hardcoded'
+    args['game_id'] = '26003e000447343339373536'
+    args['game_id'] = '5759beef1fa783000a9870ab'
+    args['move'] = '1111111111110111000000000000000000000000000000001111111111111111'
+    args['capture'] = ''
+    print 'args: ' + args
 
     #parser.add_argument('board_id')
     #parser.add_argument('game_id')
