@@ -336,7 +336,7 @@ class Game(Resource):
       else:
         # post AI move to player board
         to_move = ai_move.bestmove.uci()
-        command = '~'.join([to_move, game['state'], '1']) + '~'
+        command = '~'.join([to_move, str(game['state']), '1']) + '~'
         headers = {'content-type': 'application/x-www-form-urlencoded'}
         r = requests.post(
           PARTICLE_URI + args['board_id'] + '/movePiece', 
