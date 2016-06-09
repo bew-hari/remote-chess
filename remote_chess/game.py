@@ -208,7 +208,13 @@ class Game(Resource):
 
     player = args['board_id']
     board = chess.Board(fen=game['board'])
-    move = chess.Move.from_uci(to_uci(board, args['move'], args['capture']))
+    print 'board :'
+    print board
+
+    uci_move = to_uci(board, args['move'], args['capture'])
+    print "uci move:"
+    print uci_move
+    move = chess.Move.from_uci(uci_move)
     print 'Move ' 
     print move
 
