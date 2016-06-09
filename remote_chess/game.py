@@ -43,12 +43,14 @@ class Games(Resource):
 
     # TODO: post back to white for move
     command = '~'.join([game['_id'], 'AI', '1', '0']) + '~'
+    headers = {'content-type': 'application/x-www-urlencoded'}
     r = requests.post(
       PARTICLE_URI + args['board_id'] + '/startGame', 
-      {
+      data={
         'access_token': PHOTON_ACCESS_TOKEN, 
         'args': 'command=' + command
-      }
+      },
+      headers=headers
     )
 
     """
