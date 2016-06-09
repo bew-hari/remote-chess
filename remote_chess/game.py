@@ -34,7 +34,7 @@ class Games(Resource):
       'state': 2,
       'result': '',
       'players': [args['board_id']],
-      #'type': args['type']
+      'type': args['type']
     }
 
     # save game
