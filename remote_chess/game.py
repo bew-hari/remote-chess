@@ -212,13 +212,6 @@ class Game(Resource):
     print 'board :'
     print board
 
-    uci_move = to_uci(board, args['move'], args['capture'])
-    print "uci move:"
-    print uci_move
-    move = chess.Move.from_uci(uci_move)
-    print 'Move ' 
-    print move
-
     if board.turn != (player == game['players'][0]):
       print 'other players turn'
       command = '0'
@@ -236,7 +229,11 @@ class Game(Resource):
         'data': None
       }, 201
 
-    if not move:
+    uci_move = to_uci(board, args['move'], args['capture'])
+    print "uci move:"
+    print uci_move
+
+    if not uci_move:
       print 'No move found'
       command = '1'
       headers = {'content-type': 'application/x-www-form-urlencoded'}
@@ -252,6 +249,10 @@ class Game(Resource):
         'error': 'Invalid move',
         'data': None
       }, 201
+
+    move = chess.Move.from_uci(uci_move)
+    print 'Move ' 
+    print move
 
     if move not in board.legal_moves:
       print 'Illegal move'

@@ -28,7 +28,18 @@ void upButton() {
   }
 }
 
+static State savedState;
 void nextButton() {
+
+  savedState = board.state();
+
+  if (board.state() != DEBUG_SENSORS) {
+    board.changeState(DEBUG_SENSORS);
+  } else {
+    board.changeState(savedState);
+  }
+
+  /*
   switch(board.state()) {
     case START:
       board.changeState(WAIT_FOR_GAME);
@@ -41,4 +52,5 @@ void nextButton() {
     default:
       break;
   }
+  */
 }
