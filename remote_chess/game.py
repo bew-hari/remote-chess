@@ -25,7 +25,6 @@ class Games(Resource):
     #parser.add_argument('type', type=int) # 0 = AI, 1 = human
 
     args = json.loads(parser.parse_args()['data'])
-    print args
 
     # create game with AI
     board = chess.Board()
@@ -41,7 +40,7 @@ class Games(Resource):
     # save game
     id = mongo.db.games.save(game)
 
-    # TODO: post back to white for move
+    # post back to white for move
     command = '~'.join([game['_id'], 'AI', '1', '0']) + '~'
     headers = {'content-type': 'application/x-www-form-urlencoded'}
     r = requests.post(
@@ -180,12 +179,16 @@ class Game(Resource):
   # modify specific game
   def post(self):
     parser = reqparse.RequestParser()
-    parser.add_argument('board_id')
-    parser.add_argument('game_id')
-    parser.add_argument('move')
-    parser.add_argument('capture')
+    
+    parser.add_argument('data')
+    args = json.loads(parser.parse_args()['data'])
 
-    args = parser.parse_args()
+    #parser.add_argument('board_id')
+    #parser.add_argument('game_id')
+    #parser.add_argument('move')
+    #parser.add_argument('capture')
+
+    #args = parser.parse_args()
 
     game = mongo.db.games.find_one({
       '_id': args['game_id'],
@@ -217,65 +220,48 @@ class Game(Resource):
 
     board.push(move)
     
-    # possibly needed for race conditions when playing AI
-    #state = game['state']
-    to_move = ''
-    result = ''
-    text = ''
 
-    if game['type'] == 0:
-      if board.is_game_over():
-        game['state'] = 3
-        result = board.result()
-        text = 'You win' if result == '1-0' else 'Draw'
-      else:
-        # generate move for AI
-        engine = chess.uci.popen_engine('./remote_chess/stockfish-7-x64-linux')
-        engine.position(board)
-        ai_move = engine.go(movetime=2000)
+    if board.is_game_over():
+      game['state'] = 3
+      result = board.result()
 
-        board.push(ai_move.bestmove)
-
-        if board.is_game_over():
-          game['state'] = 3
-          result = board.result()
-          text = 'You lose' if result == '0-1' else 'Draw'
-
-        to_move = ai_move.bestmove.uci()
-        """
-        # TODO: post AI move to player board
-        command = '~'.join([to_move, game['state'], '1']) + '~'
-        r = requests.post(
-          PARTICLE_URI + args['board_id'] + '/movePiece', 
-          {
-            'access_token': PHOTON_ACCESS_TOKEN, 
-            'args': 'command=' + command
-          }
-        )
-        """
-
-    else:
-      if board.is_game_over():
-        game['state'] = 3
-        result = board.result()
-        if (player == game['players'][0] and result == '1-0') \
-            or (player == game['players'][1] and result == '0-1'):
-          text = 'You win'
-        else:
-          text = 'Draw'
-
-      opponent = game['players'][(player == game['players'][0])]
-      """
-      # TODO: post player move to other board. use move.uci()
-      command = '~'.join([move.uci(), game['state'], '1']) + '~'
+      # player wins
+      command = ''
+      headers = {'content-type': 'application/x-www-form-urlencoded'}
       r = requests.post(
-        PARTICLE_URI + opponent + '/movePiece', 
-        {
+        PARTICLE_URI + args['board_id'] + '/win', 
+        data={
           'access_token': PHOTON_ACCESS_TOKEN, 
           'args': 'command=' + command
-        }
+        },
+        headers=headers
       )
-      """
+    
+    else:
+      # generate move for AI
+      engine = chess.uci.popen_engine('./remote_chess/stockfish-7-x64-linux')
+      engine.position(board)
+      ai_move = engine.go(movetime=2000)
+
+      board.push(ai_move.bestmove)
+
+      if board.is_game_over():
+        game['state'] = 3
+        result = board.result()
+
+      # post AI move to player board
+      to_move = ai_move.bestmove.uci()
+      command = '~'.join([to_move, game['state'], '1']) + '~'
+      headers = {'content-type': 'application/x-www-form-urlencoded'}
+      r = requests.post(
+        PARTICLE_URI + args['board_id'] + '/movePiece', 
+        data={
+          'access_token': PHOTON_ACCESS_TOKEN, 
+          'args': 'command=' + command
+        },
+        headers=headers
+      )
+
 
     # update game in database
     mongo.db.games.update(
@@ -296,10 +282,7 @@ class Game(Resource):
         '_id': game['_id'],
         'board': board.fen(),
         'state': game['state'],
-        'turn': 0,
         'result': result,
-        'result_text': text,
-        'to_move': to_move,
         'players': game['players'],
         'type': game['type']
       }

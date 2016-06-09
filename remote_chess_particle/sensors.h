@@ -5,6 +5,8 @@
 
 void setupSensors();
 
-int readReedSwitches(int numSensors);
+void startRead();
+int readLine();
+int read4Lines();
 
 #endif

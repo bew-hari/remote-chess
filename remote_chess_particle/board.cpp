@@ -5,7 +5,7 @@ Board::Board(String boardID) {
     _gameID = "";
     _opponentID = "";
     _lastMove = "";
-    _state = START;
+    _state = READ_MOVE;
     _gameState = 0;
     _gameType = 0;
     _color = false;
@@ -74,7 +74,18 @@ void Board::requestGame(int gameType) {
   );
 }
 
-String Board::readConfiguration() {}
+String Board::readConfiguration() {
+  startRead();
+  unsigned int data = read4Lines();
+  unsigned int data2 = read4Lines();
+
+  clearLCD();
+  String top = String(data, BIN);       // black half of the board
+  String bottom = String(data2, BIN);   // white half of the board
+  //this->print(String(top + "\n" + bottom));
+
+  return String(top + bottom);
+}
 
 void Board::readCapture() {
   _capture = readConfiguration();
@@ -83,12 +94,14 @@ void Board::readCapture() {
 void Board::sendMove() {
   _move = readConfiguration();
 
+  /*
   // Send move
   Particle.publish(
     "make_move",
     String("{ \"board_id\": \"" + _boardID + "\", \"game_id\": \"" + _gameID + "\", \"move\": \"" + _move + "\", \"capture\": \"" + _capture + "\"}"),
     PUBLIC
   );
+  */
 
   // reset capture
   _capture = "";

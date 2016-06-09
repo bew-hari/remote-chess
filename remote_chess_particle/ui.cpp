@@ -19,6 +19,10 @@ void upButton() {
       break;
 
     case WAIT_FOR_MOVE:
+      board.setState(READ_MOVE);
+      break;
+
+    case READ_MOVE:
       break;
 
     case INVALID_MOVE:
@@ -42,6 +46,7 @@ void nextButton() {
       break;
 
     case WAIT_FOR_MOVE:
+      board.setState(READ_MOVE);
       break;
 
     case INVALID_MOVE:

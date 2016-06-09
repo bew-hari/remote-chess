@@ -7,8 +7,8 @@ Some comment here about the project
 ------------------------------------------*/
 
 #include "globals.h"
-#include "ui.h"
-#include "sensors.h"
+//#include "ui.h"
+//#include "sensors.h"
 
 void setup() {
     // Setup pins
@@ -53,6 +53,15 @@ void loop() {
           board.print("UP = capture\nRIGHT = move\n");
           board.m_first = false;
         }
+        break;
+
+      case READ_MOVE:
+        board.sendMove();
+
+        //board.setState(WAIT_FOR_SERVER);
+        break;
+
+      case READ_CAPTURE:
         break;
 
       case INVALID_MOVE:
