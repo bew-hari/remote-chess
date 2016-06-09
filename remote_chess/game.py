@@ -19,6 +19,7 @@ class Games(Resource):
   # create new game
   def post(self):
     parser = reqparse.RequestParser()
+    parser.add_argument('data')
     parser.add_argument('board_id')
     parser.add_argument('type', type=int) # 0 = AI, 1 = human
 
