@@ -180,8 +180,9 @@ class Game(Resource):
   def post(self):
     print 'Got move. Parsing'
     parser = reqparse.RequestParser()
-    
+    print 'parser' + parser
     parser.add_argument('data')
+    print 'parser' + parser
     args = json.loads(parser.parse_args()['data'])
     print 'args: ' + args
     #parser.add_argument('board_id')
