@@ -181,23 +181,10 @@ class Game(Resource):
     
     print 'Got move. Parsing'
     parser = reqparse.RequestParser()
-    print 'parser'
     parser.add_argument('data')
-    print 'parser'
-
     args = json.loads(parser.parse_args()['data'])
     print 'args: ' 
     print args
-    """
-    args={}
-    print 'parsing. not actually. they are hardcoded'
-    args['game_id'] = '26003e000447343339373536'
-    args['game_id'] = '5759beef1fa783000a9870ab'
-    args['move'] = '1111111111110111000000000000000000000000000000001111111111111111'
-    args['capture'] = ''
-    print 'args: '
-    print args
-    """
 
     #parser.add_argument('board_id')
     #parser.add_argument('game_id')
@@ -212,8 +199,7 @@ class Game(Resource):
       'state': 2
     })
     print 'game: ' +game
-    """
-    sys.stdout.flush()
+    
     if not game:
       return {
         'error': 'No game with matching id',
@@ -223,7 +209,8 @@ class Game(Resource):
     player = args['board_id']
     board = chess.Board(fen=game['board'])
     move = chess.Move.from_uci(to_uci(board, args['move'], args['capture']))
-    print 'Move ' + move
+    print 'Move ' 
+    print move
 
     if board.turn != (player == game['players'][0]):
       print 'other players turn'
@@ -378,7 +365,7 @@ class Game(Resource):
         'type': game['type']
       }
     }, 201
-    """
+    
 
 
 def to_uci(board, move, capture=None):
