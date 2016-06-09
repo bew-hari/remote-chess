@@ -178,11 +178,12 @@ class Game(Resource):
   
   # modify specific game
   def post(self):
+    print 'Got move. Parsing'
     parser = reqparse.RequestParser()
     
     parser.add_argument('data')
     args = json.loads(parser.parse_args()['data'])
-
+    print 'args: ' + args
     #parser.add_argument('board_id')
     #parser.add_argument('game_id')
     #parser.add_argument('move')
@@ -195,7 +196,7 @@ class Game(Resource):
       'players': args['board_id'],
       'state': 2
     })
-
+    print 'game: ' +game
     if not game:
       return {
         'error': 'No game with matching id',
@@ -205,8 +206,10 @@ class Game(Resource):
     player = args['board_id']
     board = chess.Board(fen=game['board'])
     move = chess.Move.from_uci(to_uci(board, args['move'], args['capture']))
+    print 'Move ' + move
 
     if board.turn != (player == game['players'][0]):
+      print 'other players turn'
       command = '0'
       headers = {'content-type': 'application/x-www-form-urlencoded'}
       r = requests.post(
@@ -223,6 +226,7 @@ class Game(Resource):
       }, 201
 
     if not move:
+      print 'No move found'
       command = '1'
       headers = {'content-type': 'application/x-www-form-urlencoded'}
       r = requests.post(
@@ -239,6 +243,7 @@ class Game(Resource):
       }, 201
 
     if move not in board.legal_moves:
+      print 'Illegal move'
       command = '2'
       headers = {'content-type': 'application/x-www-form-urlencoded'}
       r = requests.post(
@@ -254,7 +259,6 @@ class Game(Resource):
         'data': None
       }, 201
 
-    print 'Move ' + move
     board.push(move)
     result = ''
     print board
