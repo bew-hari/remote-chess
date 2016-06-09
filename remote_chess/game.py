@@ -179,12 +179,18 @@ class Game(Resource):
   # modify specific game
   def post(self):
     print 'Got move. Parsing'
+    sys.stdout.flush()
     parser = reqparse.RequestParser()
-    print 'parser' + parser
+    print 'parser'
+    sys.stdout.flush()
     parser.add_argument('data')
-    print 'parser' + parser
+    print 'parser'
+    sys.stdout.flush()
+
     args = json.loads(parser.parse_args()['data'])
     print 'args: ' + args
+    sys.stdout.flush()
+
     #parser.add_argument('board_id')
     #parser.add_argument('game_id')
     #parser.add_argument('move')
@@ -198,6 +204,7 @@ class Game(Resource):
       'state': 2
     })
     print 'game: ' +game
+    sys.stdout.flush()
     if not game:
       return {
         'error': 'No game with matching id',
