@@ -78,13 +78,32 @@ void loop() {
         break;
 
       case WAIT_FOR_OPP_MOVE:
+        {
         if (board.m_first) {
           board.clearLCD();
           board.print("Waiting for\nopponent's move\n");
           board.m_first = false;
         }
         break;
+      case DEBUG_SENSORS:
+        startRead();
+        unsigned int data = read4Lines();
+        unsigned int data2 = read4Lines();
 
+        board.clearLCD();
+        String top = String(data, HEX);       // black half of the board
+        while (top.length() < 8) {
+          top = String("0" + top);
+        }
+
+        String bottom = String(data2, HEX);   // white half of the board
+        while (bottom.length() < 8) {
+          bottom = String("0" + bottom);
+        }
+        board.print(String(top + "\n" + bottom));
+
+        break;
+        }
       default:
         break;
     }

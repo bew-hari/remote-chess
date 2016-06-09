@@ -81,7 +81,14 @@ String Board::readConfiguration() {
 
   clearLCD();
   String top = String(data, BIN);       // black half of the board
+  while (top.length() < 32) {
+    top = String("0" + top);
+  }
+
   String bottom = String(data2, BIN);   // white half of the board
+  while (bottom.length() < 32) {
+    bottom = String("0" + bottom);
+  }
   //this->print(String(top + "\n" + bottom));
 
   return String(top + bottom);

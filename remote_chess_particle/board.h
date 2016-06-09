@@ -15,7 +15,8 @@ enum State {
   READ_MOVE,
   WAIT_FOR_SERVER,
   INVALID_MOVE,
-  WAIT_FOR_OPP_MOVE
+  WAIT_FOR_OPP_MOVE,
+  DEBUG_SENSORS
 };
 
 class Board {
