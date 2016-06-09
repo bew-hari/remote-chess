@@ -5,6 +5,7 @@ from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from bson.json_util import dumps, loads
 
+import json
 import requests
 import chess
 import chess.uci
@@ -20,12 +21,37 @@ class Games(Resource):
   def post(self):
     parser = reqparse.RequestParser()
     parser.add_argument('data')
-    parser.add_argument('board_id')
-    parser.add_argument('type', type=int) # 0 = AI, 1 = human
+    #parser.add_argument('board_id')
+    #parser.add_argument('type', type=int) # 0 = AI, 1 = human
 
-    args = parser.parse_args()
+    args = json.loads(parser.parse_args()['data'])
     print args
 
+    # create game with AI
+    board = chess.Board()
+    game = {
+      '_id': str(ObjectId()),
+      'board': board.fen(),
+      'state': 2,
+      'result': '',
+      'players': [args['board_id']],
+      #'type': args['type']
+    }
+
+    # save game
+    id = mongo.db.games.save(game)
+
+    # TODO: post back to white for move
+    command = '~'.join([game['_id'], 'AI', '1', '0']) + '~'
+    r = requests.post(
+      PARTICLE_URI + args['board_id'] + '/startGame', 
+      {
+        'access_token': PHOTON_ACCESS_TOKEN, 
+        'args': 'command=' + command
+      }
+    )
+
+    """
     if args['type'] == 0:
       # create game with AI
       board = chess.Board()
@@ -110,6 +136,7 @@ class Games(Resource):
         
         # save game
         id = mongo.db.games.save(game)
+    """
 
     return {
       'error': None,
