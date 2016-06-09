@@ -209,6 +209,7 @@ class Game(Resource):
       'state': 2
     })
     print 'game: ' +game
+    """
     sys.stdout.flush()
     if not game:
       return {
@@ -374,6 +375,7 @@ class Game(Resource):
         'type': game['type']
       }
     }, 201
+    """
 
 
 def to_uci(board, move, capture=None):
