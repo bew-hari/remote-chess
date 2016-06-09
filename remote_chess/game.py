@@ -183,7 +183,7 @@ class Game(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('data')
     args = json.loads(parser.parse_args()['data'])
-    print 'args: ' 
+    print 'args: '
     print args
 
     #parser.add_argument('board_id')
@@ -198,7 +198,8 @@ class Game(Resource):
       'players': args['board_id'],
       'state': 2
     })
-    print 'game: ' +game
+    print 'game: ' 
+    print game
     
     if not game:
       return {
