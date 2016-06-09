@@ -192,7 +192,7 @@ class Game(Resource):
 
     game = mongo.db.games.find_one({
       '_id': args['game_id'],
-      #'players': args['board_id'],
+      'players': args['board_id'],
       'state': 2
     })
 
@@ -280,6 +280,8 @@ class Game(Resource):
       ai_move = engine.go(movetime=2000)
 
       board.push(ai_move.bestmove)
+      print ai_move.bestmove
+      print board
 
       if board.is_game_over():
         game['state'] = 3
@@ -323,6 +325,7 @@ class Game(Resource):
           },
           headers=headers
         )
+        print 'After posting AI move'
 
 
     # update game in database
