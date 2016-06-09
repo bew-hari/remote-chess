@@ -97,12 +97,12 @@ void loop() {
         unsigned int data2 = read4Lines();
 
         board.clearLCD();
-        String top = String(data, HEX);       // black half of the board
+        String top = String(data, HEX);       // white half of the board
         while (top.length() < 8) {
           top = String("0" + top);
         }
 
-        String bottom = String(data2, HEX);   // white half of the board
+        String bottom = String(data2, HEX);   // black half of the board
         while (bottom.length() < 8) {
           bottom = String("0" + bottom);
         }
@@ -141,7 +141,7 @@ int startGame(String command) {
 // Move opponent's piece function, called when opponent moves
 int moveOpponentPiece(String command) {
     // Convert command to char array
-    // format: move ~ status ~ turn ~
+    // format: move ~ state ~ turn ~
     char strBuffer[125] = "";
     command.toCharArray(strBuffer, 125);
 

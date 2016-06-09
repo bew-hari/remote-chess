@@ -9,4 +9,4 @@ int clockPin = A4;
 int dataPin = A5;
 
 int upPin = D7;
-int nextPin = D6;
+int nextPin = D1;

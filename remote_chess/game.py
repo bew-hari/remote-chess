@@ -255,7 +255,7 @@ class Game(Resource):
       }, 201
 
     board.push(move)
-    
+    result = ''
 
     if board.is_game_over():
       game['state'] = 3
