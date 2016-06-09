@@ -12,23 +12,15 @@ void setupButtonInterrupts(){
 void upButton() {
   switch(board.state()) {
     case START:
-      board.setState(WAIT_FOR_GAME);
-      break;
-
-    case WAIT_FOR_GAME:
+      board.changeState(WAIT_FOR_GAME);
       break;
 
     case WAIT_FOR_MOVE:
-      board.setState(READ_MOVE);
+      board.changeState(READ_MOVE);
       break;
 
-    case READ_MOVE:
-      break;
-
-    case INVALID_MOVE:
-      break;
-
-    case WAIT_FOR_OPP_MOVE:
+    case GAME_OVER:
+      board.changeState(START);
       break;
 
     default:
@@ -39,20 +31,11 @@ void upButton() {
 void nextButton() {
   switch(board.state()) {
     case START:
-      board.setState(WAIT_FOR_GAME);
-      break;
-
-    case WAIT_FOR_GAME:
+      board.changeState(WAIT_FOR_GAME);
       break;
 
     case WAIT_FOR_MOVE:
-      board.setState(READ_MOVE);
-      break;
-
-    case INVALID_MOVE:
-      break;
-
-    case WAIT_FOR_OPP_MOVE:
+      board.changeState(READ_MOVE);
       break;
 
     default:

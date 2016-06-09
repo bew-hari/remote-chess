@@ -21,7 +21,7 @@ void setup() {
     Particle.function("startGame", startGame);
     Particle.function("movePiece", moveOpponentPiece);
     Particle.function("error", handleError);
-    Particle.function("win", win);
+    Particle.function("gameOver", gameOver);
 
     // Listen to webhook response
     //Particle.subscribe("hook-response/make_move", myMoveHandler , MY_DEVICES);
@@ -60,32 +60,38 @@ void loop() {
       case READ_MOVE:
         board.sendMove();
 
-        board.setState(WAIT_FOR_SERVER);
+        board.changeState(WAIT_FOR_SERVER);
         break;
 
       case READ_CAPTURE:
         break;
 
       case WAIT_FOR_SERVER:
-        break;
-
-      case INVALID_MOVE:
         if (board.m_first) {
           board.clearLCD();
-          board.print("Invalid move\nTry again\n");
+          board.print("Waiting for\nserver response\n");
           board.m_first = false;
         }
         break;
 
-      case WAIT_FOR_OPP_MOVE:
-        {
+      case MOVE_OPP_PIECE:
         if (board.m_first) {
           board.clearLCD();
-          board.print("Waiting for\nopponent's move\n");
+          board.print(String("Opponent's move\n" + board.getLastOppMove() + "\n"));
           board.m_first = false;
         }
+
+        delay(5000);
+
+        if (board.isTurn()) {
+          board.changeState(WAIT_FOR_MOVE);
+        } else {
+          board.changeState(WAIT_FOR_SERVER);
+        }
         break;
+
       case DEBUG_SENSORS:
+      {
         startRead();
         unsigned int data = read4Lines();
         unsigned int data2 = read4Lines();
@@ -103,72 +109,12 @@ void loop() {
         board.print(String(top + "\n" + bottom));
 
         break;
-        }
+      }
       default:
         break;
     }
 
     delay(200);
-
-    /*
-    Serial1.print(getMenuString());
-    Serial1.print("\n");
-    Serial1.print(getLine2());
-
-    delay(100);
-    */
-
-    /*
-    // Publish create game event if not currently in a game
-    if (digitalRead(startButton) == HIGH && board.getState() == 0) {
-        // Get and save the game type
-        int gameType = 0;
-        board.setGameType(gameType);
-
-        // Create a game
-        Particle.publish("create_game", "{ \"board_id\": \"" + board.getBoardID() + "\", \"type\": \"" + String(gameType) + "\"}", PRIVATE);
-        board.setState(1);
-
-        // Wait 10 seconds
-        delay(10000);
-    }
-
-    // Read board configuration before move
-    if (digitalRead(startMove) == HIGH && board.isTurn()) {
-        // Read configuration before the move
-        // TODO: read bitstring
-
-        // TODO: Get the move in UCI format somehow?
-
-    }
-
-    if (digitalRead(captureMove) == HIGH && board.isTurn()) {
-        // Read configuration before the capture
-        // TODO: read bitstring
-        int beforeCapture = 0;
-
-        // Read configuration after the capture
-        // TODO: read bitstring
-        int afterCapture = 0;
-
-        beforeMove = afterCapture;
-    }
-
-    // Read board configuration after move
-    if (digitalRead(confirmMove) == HIGH && board.isTurn()) {
-        // Read configuration after the move
-        // TODO: read bitstring
-        afterMove = 0;
-
-        String move = "";//toUCI(beforeMove, afterMove);
-
-        // Send move
-        Particle.publish("make_move", "{ \"board_id\": \"" + boardID + "\", \"game_id\": \"" + gameID + "\", \"move\": \"" + move + "\"}", PRIVATE);
-
-        // Wait 5 seconds
-        delay(5000);
-    }
-    */
 }
 
 // Start game function, called when game is ready
@@ -184,10 +130,10 @@ int startGame(String command) {
     bool turn = atoi(strtok(NULL, "~"));
     bool color = atoi(strtok(NULL, "~"));
 
-    board.set(gameID);
+    board.setGameID(gameID);
 
     // wait for player's move
-    board.setState(WAIT_FOR_MOVE);
+    board.changeState(WAIT_FOR_MOVE);
 
     return 0;
 }
@@ -204,45 +150,50 @@ int moveOpponentPiece(String command) {
     int state = atoi(strtok(NULL, "~"));
     bool turn = atoi(strtok(NULL, "~"));
 
+    // save variables
+    board.setTurn(turn);
+    board.setLastOppMove(move);
+
+    // change to corresponding state
+    board.changeState(MOVE_OPP_PIECE);
+
     // Move opponent's piece
     // TODO: issue command to motion module
-
-    board.clearLCD();
-    board.print(move);
-    //board.setState(WAIT_FOR_MOVE);
-
-    // Check game status
-    if (state == 3) {
-        // Game over. Notify player and prompt for new game
-        // TODO: print to LCD
-
-        board.setState(START);
-    }
 
     return 0;
 }
 
 int handleError(String command) {
-  if (command == "0") {
+  if (command.equals("0")) {
     // other player's turn
     board.clearLCD();
-    board.print("WTF");
-  } else if (command == "1") {
+    board.print("Other player's\nturn\n");
+  } else if (command.equals("1")) {
     // unrecognized move
     board.clearLCD();
-    board.print("Invalid move");
-
-  } else if (command == "2") {
+    board.print("Invalid move\nTry again\n");
+  } else if (command.equals("2")) {
     // illegal move
     board.clearLCD();
-    board.print("Illegal move");
+    board.print("Illegal move\nTry again\n");
   }
 }
 
-int win(String command) {
+int gameOver(String command) {
+    board.clearLCD();
+    if (command.equals("0")) {
+        board.print("You win! Press\nUP to restart\n");
+    } else if (command.equals("1")) {
+        board.print("You lose. Press\nUP to restart\n");
+    } else {
+        board.print("Unrecognized\ngameOver string\n");
+    }
+
+    board.changeState(GAME_OVER);
     return 0;
 }
 
+/*
 // Handler for response from sending this board's move
 void myMoveHandler(const char *event, const char *data) {
     // Convert data to char array
@@ -268,7 +219,6 @@ void myMoveHandler(const char *event, const char *data) {
     String result = strtok(NULL, "~");
     bool turn = atoi(strtok(NULL, "~"));
 
-/*
     if (gameType == 0) {
         if (strcmp(move, "") != 0) {
             // Move AI piece
@@ -283,7 +233,6 @@ void myMoveHandler(const char *event, const char *data) {
         resetBoard();
         return;
     }
-*/
 
     // Check game status
     if (state == 3) {
@@ -293,3 +242,4 @@ void myMoveHandler(const char *event, const char *data) {
         board.reset();
     }
 }
+*/

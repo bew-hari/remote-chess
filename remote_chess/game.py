@@ -262,10 +262,10 @@ class Game(Resource):
       result = board.result()
 
       # player wins
-      command = ''
+      command = '0'
       headers = {'content-type': 'application/x-www-form-urlencoded'}
       r = requests.post(
-        PARTICLE_URI + args['board_id'] + '/win', 
+        PARTICLE_URI + args['board_id'] + '/gameOver', 
         data={
           'access_token': PHOTON_ACCESS_TOKEN, 
           'args': command
@@ -285,18 +285,44 @@ class Game(Resource):
         game['state'] = 3
         result = board.result()
 
-      # post AI move to player board
-      to_move = ai_move.bestmove.uci()
-      command = '~'.join([to_move, game['state'], '1']) + '~'
-      headers = {'content-type': 'application/x-www-form-urlencoded'}
-      r = requests.post(
-        PARTICLE_URI + args['board_id'] + '/movePiece', 
-        data={
-          'access_token': PHOTON_ACCESS_TOKEN, 
-          'args': command
-        },
-        headers=headers
-      )
+        # post AI move to player board
+        to_move = ai_move.bestmove.uci()
+        command = '~'.join([to_move, game['state'], '0']) + '~'
+        headers = {'content-type': 'application/x-www-form-urlencoded'}
+        r = requests.post(
+          PARTICLE_URI + args['board_id'] + '/movePiece', 
+          data={
+            'access_token': PHOTON_ACCESS_TOKEN, 
+            'args': command
+          },
+          headers=headers
+        )
+
+        # computer wins
+        command = '1'
+        headers = {'content-type': 'application/x-www-form-urlencoded'}
+        r = requests.post(
+          PARTICLE_URI + args['board_id'] + '/gameOver', 
+          data={
+            'access_token': PHOTON_ACCESS_TOKEN, 
+            'args': command
+          },
+          headers=headers
+        )
+
+      else:
+        # post AI move to player board
+        to_move = ai_move.bestmove.uci()
+        command = '~'.join([to_move, game['state'], '1']) + '~'
+        headers = {'content-type': 'application/x-www-form-urlencoded'}
+        r = requests.post(
+          PARTICLE_URI + args['board_id'] + '/movePiece', 
+          data={
+            'access_token': PHOTON_ACCESS_TOKEN, 
+            'args': command
+          },
+          headers=headers
+        )
 
 
     # update game in database

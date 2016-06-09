@@ -1,10 +1,11 @@
 #include "board.h"
 
-Board::Board(String boardID) {
-    _boardID = boardID;  // board identifier
+Board::Board(const String& boardID) {
+    _boardID = String(boardID);  // board identifier
     _gameID = "";
     _opponentID = "";
     _lastMove = "";
+    _lastOppMove = "";
     _state = START;
     _gameState = 0;
     _gameType = 0;
@@ -19,19 +20,12 @@ Board::Board(String boardID) {
     m_first = true;
 }
 
-void Board::set(const String& gameID) {
-    _gameID = String(gameID);
-    //_opponentID = String(opponentID);
-    //_gameState = gameState;
-    //_color = color;
-    //_turn = turn;
-}
-
 void Board::reset() {
     // Reset all members to idle state
     _gameID = "";
     _opponentID = "";
     _lastMove = "";
+    _lastOppMove = "";
     _state = START;
     _gameState = 0;
     _gameType = 0;
@@ -39,19 +33,20 @@ void Board::reset() {
     _turn = false;
 
     m_first = true;
-    //_before = LongInt(0, 0);
-    //_after = LongInt(0, 0);
 }
 
 String Board::getBoardID() { return _boardID; }
 void Board::setBoardID(const String& boardID) { _boardID = String(boardID); }
 
+String Board::getGameID() { return _gameID; }
+void Board::setGameID(const String& gameID) { _gameID = String(gameID); }
+
 State Board::state() { return _state; }
-void Board::setState(State state) {
-    if (_state != state) {
-      m_first = true;
-      _state = state;
-    }
+void Board::changeState(State state) {
+  if (_state != state) {
+    m_first = true;
+    _state = state;
+  }
 }
 
 int Board::getGameState() { return _gameState; }
@@ -62,6 +57,11 @@ void Board::setGameType(int gameType) { _gameType = gameType; }
 
 bool Board::isTurn() { return _turn; }
 void Board::setTurn(bool turn) { _turn = turn; }
+
+String Board::getLastOppMove() { return _lastOppMove; }
+void Board::setLastOppMove(const String& move) {
+  _lastOppMove = String(move);
+}
 
 void Board::clearLCD() { _lcd.clear(); }
 
@@ -89,7 +89,6 @@ String Board::readConfiguration() {
   while (bottom.length() < 32) {
     bottom = String("0" + bottom);
   }
-  //this->print(String(top + "\n" + bottom));
 
   return String(top + bottom);
 }

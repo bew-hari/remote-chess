@@ -14,20 +14,18 @@ enum State {
   READ_CAPTURE,
   READ_MOVE,
   WAIT_FOR_SERVER,
-  INVALID_MOVE,
-  WAIT_FOR_OPP_MOVE,
+  MOVE_OPP_PIECE,
+  GAME_OVER,
   DEBUG_SENSORS
 };
 
 class Board {
   private:
-    //LongInt _before;
-    //LongInt _after;
-
     String _boardID;        // board identifier
     String _gameID;         // game identifier, set when game is started
     String _opponentID;     // opponent identifier, set when game is started
     String _lastMove;       // player's last move used to undo errors
+    String _lastOppMove;    // opponent's last move
     State _state;
     int _gameState;            // 0 for idle, 1 for requesting game, 2 for game in progress, 3 for game over
     int _gameType;          // 0 for AI, 1 for human
@@ -42,16 +40,18 @@ class Board {
   public:
     bool m_first;
 
-    Board(String boardID);
+    Board(const String& boardID);
 
-    void set(const String& gameID);
     void reset();
 
     String getBoardID();
     void setBoardID(const String& boardID);
 
+    String getGameID();
+    void setGameID(const String& gameID);
+
     State state();
-    void setState(State state);
+    void changeState(State state);
 
     int getGameState();
     void setGameState(int gameState);
@@ -61,6 +61,9 @@ class Board {
 
     bool isTurn();
     void setTurn(bool turn);
+
+    String getLastOppMove();
+    void setLastOppMove(const String& move);
 
     void clearLCD();
 
