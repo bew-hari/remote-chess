@@ -18,7 +18,6 @@ PHOTON_ACCESS_TOKEN = app.config['PHOTON_ACCESS_TOKEN']
 class Games(Resource):
   # create new game
   def post(self):
-    print request
     parser = reqparse.RequestParser()
     parser.add_argument('board_id')
     parser.add_argument('type', type=int) # 0 = AI, 1 = human
