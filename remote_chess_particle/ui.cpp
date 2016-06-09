@@ -16,7 +16,6 @@ void upButton() {
       break;
 
     case WAIT_FOR_GAME:
-      board.setState(START);
       break;
 
     case WAIT_FOR_MOVE:
@@ -40,7 +39,6 @@ void nextButton() {
       break;
 
     case WAIT_FOR_GAME:
-      board.setState(START);
       break;
 
     case WAIT_FOR_MOVE:

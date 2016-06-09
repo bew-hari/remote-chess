@@ -43,7 +43,7 @@ class Games(Resource):
 
     # TODO: post back to white for move
     command = '~'.join([game['_id'], 'AI', '1', '0']) + '~'
-    headers = {'content-type': 'application/x-www-urlencoded'}
+    headers = {'content-type': 'application/x-www-form-urlencoded'}
     r = requests.post(
       PARTICLE_URI + args['board_id'] + '/startGame', 
       data={
