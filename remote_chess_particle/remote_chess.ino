@@ -18,16 +18,64 @@ void setup() {
     board.clearLCD();
 
     // Setup cloud functions
-    Particle.function("startGame", startGame);
-    Particle.function("movePiece", moveOpponentPiece);
+    //Particle.function("startGame", startGame);
+    //Particle.function("movePiece", moveOpponentPiece);
 
     // Listen to webhook response
-    Particle.subscribe("hook-response/make_move", myMoveHandler , MY_DEVICES);
+    //Particle.subscribe("hook-response/make_move", myMoveHandler , MY_DEVICES);
 }
 
 void loop() {
-    // Refresh LCD
-    board.clearLCD();
+    // Clear LCD
+    //board.clearLCD();
+
+    switch(board.state()) {
+      case START:
+        if (board.m_first) {
+          board.clearLCD();
+          board.print("Press a button\nto start a game\n");
+          board.m_first = false;
+        }
+        break;
+
+      case WAIT_FOR_GAME:
+        if (board.m_first) {
+          board.requestGame(0);
+          board.clearLCD();
+          board.print("Waiting for a\ngame\n");
+          board.m_first = false;
+        }
+        break;
+
+      case WAIT_FOR_MOVE:
+        if (board.m_first) {
+          board.clearLCD();
+          board.print("UP = capture\nRIGHT = move\n");
+          board.m_first = false;
+        }
+        break;
+
+      case INVALID_MOVE:
+        if (board.m_first) {
+          board.clearLCD();
+          board.print("Invalid move\nTry again\n");
+          board.m_first = false;
+        }
+        break;
+
+      case WAIT_FOR_OPP_MOVE:
+        if (board.m_first) {
+          board.clearLCD();
+          board.print("Waiting for\nopponent's move\n");
+          board.m_first = false;
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    delay(200);
 
     /*
     Serial1.print(getMenuString());
@@ -125,7 +173,7 @@ int moveOpponentPiece(String command) {
     int state = atoi(strtok(NULL, "~"));
     bool turn = atoi(strtok(NULL, "~"));
 
-    board.setState(state);
+    board.setGameState(state);
     board.setTurn(turn);
 
     // Move opponent's piece
@@ -136,7 +184,7 @@ int moveOpponentPiece(String command) {
         // Game over. Notify player and prompt for new game
         // TODO: print to LCD
 
-        board.setState(0);
+        board.setGameState(0);
     }
 
     return 0;

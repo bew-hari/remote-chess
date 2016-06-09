@@ -12,6 +12,8 @@ import chess.uci
 from remote_chess import app
 from remote_chess.config import mongo
 
+import sys
+
 PARTICLE_URI = app.config['PARTICLE_URI']
 PHOTON_ACCESS_TOKEN = app.config['PHOTON_ACCESS_TOKEN']
 
@@ -23,6 +25,7 @@ class Games(Resource):
     parser.add_argument('type', type=int) # 0 = AI, 1 = human
 
     args = parser.parse_args()
+    sys.stdout.write(args);
 
     if args['type'] == 0:
       # create game with AI

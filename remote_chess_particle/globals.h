@@ -12,8 +12,6 @@ extern int clockPin;
 extern int dataPin;
 
 extern int upPin;
-extern int backPin;
-extern int downPin;
 extern int nextPin;
 
 #endif

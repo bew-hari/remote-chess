@@ -5,7 +5,8 @@ Board::Board(String boardID) {
     _gameID = "";
     _opponentID = "";
     _lastMove = "";
-    _state = 0;
+    _state = START;
+    _gameState = 0;
     _gameType = 0;
     _color = false;
     _turn = false;
@@ -14,12 +15,14 @@ Board::Board(String boardID) {
     _move = "";
 
     _lcd = Serial_LCD_SparkFun();
+
+    m_first = true;
 }
 
-void Board::set(const String& gameID, const String& opponentID, int state, bool color, bool turn) {
+void Board::set(const String& gameID, const String& opponentID, int gameState, bool color, bool turn) {
     _gameID = String(gameID);
     _opponentID = String(opponentID);
-    _state = state;
+    _gameState = gameState;
     _color = color;
     _turn = turn;
 }
@@ -29,11 +32,13 @@ void Board::reset() {
     _gameID = "";
     _opponentID = "";
     _lastMove = "";
+    _state = START;
+    _gameState = 0;
     _gameType = 0;
-    _state = 0;
     _color = false;
     _turn = false;
 
+    m_first = true;
     //_before = LongInt(0, 0);
     //_after = LongInt(0, 0);
 }
@@ -41,8 +46,16 @@ void Board::reset() {
 String Board::getBoardID() { return _boardID; }
 void Board::setBoardID(const String& boardID) { _boardID = String(boardID); }
 
-int Board::getState() { return _state; }
-void Board::setState(int state) { _state = state; }
+State Board::state() { return _state; }
+void Board::setState(State state) {
+    if (_state != state) {
+      m_first = true;
+      _state = state;
+    }
+}
+
+int Board::getGameState() { return _gameState; }
+void Board::setGameState(int gameState) { _gameState = gameState; }
 
 int Board::getGameType() { return _gameType; }
 void Board::setGameType(int gameType) { _gameType = gameType; }
@@ -53,23 +66,12 @@ void Board::setTurn(bool turn) { _turn = turn; }
 void Board::clearLCD() { _lcd.clear(); }
 
 void Board::requestGame(int gameType) {
-  // board is not idle
-  if (_state != 0) {
-    return;
-  }
-
   // Request a game
   Particle.publish(
     "create_game",
-    "{ \"board_id\": \"" + _boardID + "\", \"type\": \"" + String(gameType) + "\"}",
-    PRIVATE
+    String("{ \"board_id\": \"" + _boardID + "\", \"type\": \"" + String(gameType) + "\"}"),
+    PUBLIC
   );
-
-  // set state to waiting
-  _state = 1;
-
-  // Wait 10 seconds
-  delay(10000);
 }
 
 String Board::readConfiguration() {}
@@ -84,12 +86,16 @@ void Board::sendMove() {
   // Send move
   Particle.publish(
     "make_move",
-    "{ \"board_id\": \"" + _boardID + "\", \"game_id\": \"" + _gameID + "\", \"move\": \"" + _move + "\", \"capture\": \"" + _capture + "\"}",
-    PRIVATE
+    String("{ \"board_id\": \"" + _boardID + "\", \"game_id\": \"" + _gameID + "\", \"move\": \"" + _move + "\", \"capture\": \"" + _capture + "\"}"),
+    PUBLIC
   );
 
   // reset capture
   _capture = "";
+}
+
+void Board::print(String msg) {
+  Serial1.print(msg);
 }
 
 /*

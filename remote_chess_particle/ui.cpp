@@ -3,34 +3,55 @@
 
 void setupButtonInterrupts(){
   pinMode(upPin, INPUT_PULLDOWN);
-  attachInterrupt(D7, upButton, RISING);
-
-  pinMode(backPin, INPUT_PULLDOWN);
-  attachInterrupt(D6, backButton, RISING);
-
-  pinMode(downPin, INPUT_PULLDOWN);
-  attachInterrupt(D5, downButton, RISING);
+  attachInterrupt(upPin, upButton, RISING);
 
   pinMode(nextPin, INPUT_PULLDOWN);
-  attachInterrupt(D4, nextButton, RISING);
+  attachInterrupt(nextPin, nextButton, RISING);
 }
 
-// request game
-void downButton() {
-  // default to AI game
-  int gameType = 0;
-
-  board.requestGame(gameType);
-}
-
-void backButton() {}
-
-// capture piece
 void upButton() {
-  board.readCapture();
+  switch(board.state()) {
+    case START:
+      board.setState(WAIT_FOR_GAME);
+      break;
+
+    case WAIT_FOR_GAME:
+      break;
+
+    case WAIT_FOR_MOVE:
+      break;
+
+    case INVALID_MOVE:
+      break;
+
+    case WAIT_FOR_OPP_MOVE:
+      break;
+
+    default:
+      break;
+  }
 }
 
-// move piece
 void nextButton() {
-  board.sendMove();
+  switch(board.state()) {
+    case START:
+      board.setState(WAIT_FOR_GAME);
+      board.requestGame(0);
+      break;
+
+    case WAIT_FOR_GAME:
+      break;
+
+    case WAIT_FOR_MOVE:
+      break;
+
+    case INVALID_MOVE:
+      break;
+
+    case WAIT_FOR_OPP_MOVE:
+      break;
+
+    default:
+      break;
+  }
 }
