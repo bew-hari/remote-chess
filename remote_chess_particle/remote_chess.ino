@@ -20,6 +20,8 @@ void setup() {
     // Setup cloud functions
     Particle.function("startGame", startGame);
     Particle.function("movePiece", moveOpponentPiece);
+    Particle.function("error", handleError);
+    Particle.function("win", win);
 
     // Listen to webhook response
     //Particle.subscribe("hook-response/make_move", myMoveHandler , MY_DEVICES);
@@ -58,10 +60,13 @@ void loop() {
       case READ_MOVE:
         board.sendMove();
 
-        //board.setState(WAIT_FOR_SERVER);
+        board.setState(WAIT_FOR_SERVER);
         break;
 
       case READ_CAPTURE:
+        break;
+
+      case WAIT_FOR_SERVER:
         break;
 
       case INVALID_MOVE:
@@ -180,20 +185,42 @@ int moveOpponentPiece(String command) {
     int state = atoi(strtok(NULL, "~"));
     bool turn = atoi(strtok(NULL, "~"));
 
-    board.setGameState(state);
-    board.setTurn(turn);
-
     // Move opponent's piece
     // TODO: issue command to motion module
+
+    board.clearLCD();
+    board.print(move);
+    //board.setState(WAIT_FOR_MOVE);
 
     // Check game status
     if (state == 3) {
         // Game over. Notify player and prompt for new game
         // TODO: print to LCD
 
-        board.setGameState(0);
+        board.setState(START);
     }
 
+    return 0;
+}
+
+int handleError(String command) {
+  if (command == "0") {
+    // other player's turn
+    board.clearLCD();
+    board.print("WTF");
+  } else if (command == "1") {
+    // unrecognized move
+    board.clearLCD();
+    board.print("Invalid move");
+
+  } else if (command == "2") {
+    // illegal move
+    board.clearLCD();
+    board.print("Illegal move");
+  }
+}
+
+int win(String command) {
     return 0;
 }
 

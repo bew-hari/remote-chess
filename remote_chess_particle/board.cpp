@@ -5,7 +5,7 @@ Board::Board(String boardID) {
     _gameID = "";
     _opponentID = "";
     _lastMove = "";
-    _state = READ_MOVE;
+    _state = START;
     _gameState = 0;
     _gameType = 0;
     _color = false;
@@ -94,14 +94,12 @@ void Board::readCapture() {
 void Board::sendMove() {
   _move = readConfiguration();
 
-  /*
   // Send move
   Particle.publish(
     "make_move",
     String("{ \"board_id\": \"" + _boardID + "\", \"game_id\": \"" + _gameID + "\", \"move\": \"" + _move + "\", \"capture\": \"" + _capture + "\"}"),
     PUBLIC
   );
-  */
 
   // reset capture
   _capture = "";

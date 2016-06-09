@@ -207,12 +207,48 @@ class Game(Resource):
     move = chess.Move.from_uci(to_uci(board, args['move'], args['capture']))
 
     if board.turn != (player == game['players'][0]):
+      command = '0'
+      headers = {'content-type': 'application/x-www-form-urlencoded'}
+      r = requests.post(
+        PARTICLE_URI + args['board_id'] + '/error', 
+        data={
+          'access_token': PHOTON_ACCESS_TOKEN, 
+          'args': 'command=' + command
+        },
+        headers=headers
+      )
       return {
         'error': 'Other player\'s turn',
         'data': None
       }, 201
 
+    if not move:
+      command = '1'
+      headers = {'content-type': 'application/x-www-form-urlencoded'}
+      r = requests.post(
+        PARTICLE_URI + args['board_id'] + '/error', 
+        data={
+          'access_token': PHOTON_ACCESS_TOKEN, 
+          'args': 'command=' + command
+        },
+        headers=headers
+      )
+      return {
+        'error': 'Invalid move',
+        'data': None
+      }, 201
+
     if move not in board.legal_moves:
+      command = '2'
+      headers = {'content-type': 'application/x-www-form-urlencoded'}
+      r = requests.post(
+        PARTICLE_URI + args['board_id'] + '/error', 
+        data={
+          'access_token': PHOTON_ACCESS_TOKEN, 
+          'args': 'command=' + command
+        },
+        headers=headers
+      )
       return {
         'error': 'Illegal move',
         'data': None
@@ -312,7 +348,7 @@ def to_uci(board, move, capture=None):
 
     # can only capture exactly one piece
     if count != 1:
-      return '????'
+      return None
 
     c_rank = index / 8
     c_file = index % 8
@@ -335,7 +371,7 @@ def to_uci(board, move, capture=None):
 
     # can only move a single piece
     if count != 2:
-      return '????'
+      return None
 
     m_source_rank = source / 8
     m_source_file = source % 8
@@ -353,7 +389,7 @@ def to_uci(board, move, capture=None):
           abs(m_dest_rank - c_rank) == 1):
       return m_source + m_dest
     else:   # invalid capture
-      return '????'
+      return None
 
   else:
     m_diff = '{:064b}'.format(int(before, base=2) ^ int(move, base=2))
@@ -374,7 +410,7 @@ def to_uci(board, move, capture=None):
         source = indices[1]
         dest = indices[0]
       else:
-        return '????'
+        return None
 
       m_source_rank = source / 8
       m_source_file = source % 8
@@ -395,14 +431,14 @@ def to_uci(board, move, capture=None):
 
       # not in the bottom or top ranks
       if any(r != 0 for r in ranks) or any(r != 7 for r in ranks):
-        return '????'
+        return None
 
       # not in castling format
       if (before[indices[0]] != '1' or
           before[indices[4]] != '1' or 
           move[indices[2]] != '1' or 
           move[indices[3]] != '1'):
-        return '????'
+        return None
 
       source = -1
       dest = -1
@@ -413,7 +449,7 @@ def to_uci(board, move, capture=None):
         source = indices[0]
         dest = indices[2]
       else:
-        return '????'
+        return None
       
       m_source_rank = source / 8
       m_source_file = source % 8
@@ -426,4 +462,4 @@ def to_uci(board, move, capture=None):
       return m_source + m_dest
 
     else:
-      return '????'
+      return None
