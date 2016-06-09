@@ -47,7 +47,7 @@ class Games(Resource):
       PARTICLE_URI + args['board_id'] + '/startGame', 
       data={
         'access_token': PHOTON_ACCESS_TOKEN, 
-        'args': 'command=' + command
+        'args': command
       },
       headers=headers
     )
@@ -192,7 +192,7 @@ class Game(Resource):
 
     game = mongo.db.games.find_one({
       '_id': args['game_id'],
-      'players': args['board_id'],
+      #'players': args['board_id'],
       'state': 2
     })
 
@@ -213,7 +213,7 @@ class Game(Resource):
         PARTICLE_URI + args['board_id'] + '/error', 
         data={
           'access_token': PHOTON_ACCESS_TOKEN, 
-          'args': 'command=' + command
+          'args': command
         },
         headers=headers
       )
@@ -229,7 +229,7 @@ class Game(Resource):
         PARTICLE_URI + args['board_id'] + '/error', 
         data={
           'access_token': PHOTON_ACCESS_TOKEN, 
-          'args': 'command=' + command
+          'args': command
         },
         headers=headers
       )
@@ -245,7 +245,7 @@ class Game(Resource):
         PARTICLE_URI + args['board_id'] + '/error', 
         data={
           'access_token': PHOTON_ACCESS_TOKEN, 
-          'args': 'command=' + command
+          'args': command
         },
         headers=headers
       )
@@ -268,7 +268,7 @@ class Game(Resource):
         PARTICLE_URI + args['board_id'] + '/win', 
         data={
           'access_token': PHOTON_ACCESS_TOKEN, 
-          'args': 'command=' + command
+          'args': command
         },
         headers=headers
       )
@@ -293,7 +293,7 @@ class Game(Resource):
         PARTICLE_URI + args['board_id'] + '/movePiece', 
         data={
           'access_token': PHOTON_ACCESS_TOKEN, 
-          'args': 'command=' + command
+          'args': command
         },
         headers=headers
       )
