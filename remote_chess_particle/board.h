@@ -6,6 +6,7 @@
 #include "Serial_LCD_SparkFun.h"
 #include "sensors.h"
 #include "ui.h"
+#include "motor.h"
 
 enum State {
   START,
@@ -34,6 +35,7 @@ class Board {
     bool _turn;             // 1 if currently this board's turn to move, 0 otherwise
 
     int _error;
+    int _gameOver;
 
     String _move;
     String _capture;
@@ -71,8 +73,11 @@ class Board {
     int getErrorCode();
     void setErrorCode(int error);
 
+    int getGameOver();
+    void setGameOver(int gameOver);
+
     bool hasCaptured();
-    
+
     void clearLCD();
 
     void requestGame(int gameType);

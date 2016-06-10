@@ -8,6 +8,14 @@ int latchPin = A3;
 int clockPin = A4;
 int dataPin = A5;
 
-int upPin = D7;
-int nextPin = D1;
-int downPin = D3;
+int upPin = A0;
+int nextPin = A1;
+int downPin = A2;
+
+// motor stuff
+int mag1 = D3;
+int mag2 = D2;
+int latch = D4; // latch enable
+int en = D5;    // driver enable
+int dir = D6;  // direction
+int stp = D7;   // step pulse

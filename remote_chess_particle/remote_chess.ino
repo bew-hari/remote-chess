@@ -14,6 +14,7 @@ void setup() {
     // Setup pins
     setupButtonInterrupts();
     setupSensors();
+    setupMotion();
 
     board.clearLCD();
 
@@ -22,6 +23,15 @@ void setup() {
     Particle.function("movePiece", moveOpponentPiece);
     Particle.function("error", handleError);
     Particle.function("gameOver", gameOver);
+    Particle.function("squareX", squareX);
+    Particle.function("squareY", squareY);
+    Particle.function("stepX", stepX);
+    Particle.function("stepY", stepY);
+    Particle.function("move", move);
+    //Particle.function("movePiece", movePiece);
+    Particle.function("magOn", magOn);
+    Particle.function("magOff", magOff);
+    Particle.function("magInv", magInv);
 
     // Listen to webhook response
     //Particle.subscribe("hook-response/make_move", myMoveHandler , MY_DEVICES);
@@ -55,7 +65,7 @@ void loop() {
           if (board.hasCaptured()) {
             board.print("Capturing\n");
           } else {
-            board.print("UP = capture\nRIGHT = move\n");
+            board.print("UP = move\nRIGHT = capture\n");
           }
           board.m_first = false;
         }
@@ -88,6 +98,8 @@ void loop() {
           board.clearLCD();
           board.print(String("Opponent's move\n" + board.getLastOppMove() + "\n"));
           board.m_first = false;
+
+          movePiece(board.getLastOppMove());
         }
 
         delay(5000);
@@ -127,6 +139,26 @@ void loop() {
 
         board.changeState(WAIT_FOR_MOVE);
 
+        break;
+
+      case GAME_OVER:
+        if (board.m_first) {
+          board.clearLCD();
+
+          switch(board.getGameOver()) {
+            case 1:
+              board.print("You win! Press\nUP to restart\n");
+              break;
+
+            case 2:
+              board.print("You lose. Press\nUP to restart\n");
+              break;
+
+            default:
+              break;
+          }
+          board.m_first = false;
+        }
         break;
 
       case DEBUG_SENSORS:
@@ -193,7 +225,10 @@ int moveOpponentPiece(String command) {
     board.setTurn(turn);
     board.setLastOppMove(move);
 
-    // change to corresponding state
+    if (state == 3) {
+      board.setGameOver(2);
+    }
+
     board.changeState(MOVE_OPP_PIECE);
 
     // Move opponent's piece
@@ -211,15 +246,7 @@ int handleError(String command) {
 }
 
 int gameOver(String command) {
-    board.clearLCD();
-    if (command.equals("0")) {
-        board.print("You win! Press\nUP to restart\n");
-    } else if (command.equals("1")) {
-        board.print("You lose. Press\nUP to restart\n");
-    } else {
-        board.print("Unrecognized\ngameOver string\n");
-    }
-
+    board.setGameOver(1);
     board.changeState(GAME_OVER);
     return 0;
 }

@@ -15,4 +15,11 @@ extern int upPin;
 extern int nextPin;
 extern int downPin;
 
+extern int mag1;
+extern int mag2;
+extern int latch; // latch enable
+extern int en;    // driver enable
+extern int dir;  // direction
+extern int stp;   // step pulse
+
 #endif

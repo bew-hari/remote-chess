@@ -12,6 +12,7 @@ Board::Board(const String& boardID) {
     _color = false;
     _turn = false;
     _error = 0;
+    _gameOver = 0;
 
     _capture = "";
     _move = "";
@@ -34,6 +35,7 @@ void Board::reset() {
     _turn = false;
 
     _error = 0;
+    _gameOver = 0;
 
     m_first = true;
 }
@@ -68,6 +70,9 @@ void Board::setLastOppMove(const String& move) {
 
 int Board::getErrorCode() { return _error; }
 void Board::setErrorCode(int error) { _error = error; }
+
+int Board::getGameOver() { return _gameOver; }
+void Board::setGameOver(int gameOver) { _gameOver = gameOver; }
 
 bool Board::hasCaptured() { return _capture != ""; }
 
