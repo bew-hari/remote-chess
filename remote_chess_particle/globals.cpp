@@ -10,3 +10,4 @@ int dataPin = A5;
 
 int upPin = D7;
 int nextPin = D1;
+int downPin = D3;

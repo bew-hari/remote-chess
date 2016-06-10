@@ -69,6 +69,8 @@ void Board::setLastOppMove(const String& move) {
 int Board::getErrorCode() { return _error; }
 void Board::setErrorCode(int error) { _error = error; }
 
+bool Board::hasCaptured() { return _capture != ""; }
+
 void Board::clearLCD() { _lcd.clear(); }
 
 void Board::requestGame(int gameType) {

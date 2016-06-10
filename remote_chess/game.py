@@ -481,14 +481,14 @@ def to_uci(board, move, capture=None):
       files = [i%8 for i in indices]
 
       # not in the bottom or top ranks
-      if any(r != 0 for r in ranks) or any(r != 7 for r in ranks):
+      if any(r != 0 for r in ranks) and any(r != 7 for r in ranks):
         return None
 
       # not in castling format
       if (before[indices[0]] != '1' or
-          before[indices[4]] != '1' or 
-          move[indices[2]] != '1' or 
-          move[indices[3]] != '1'):
+          before[indices[3]] != '1' or 
+          move[indices[1]] != '1' or 
+          move[indices[1]] != '1'):
         return None
 
       source = -1

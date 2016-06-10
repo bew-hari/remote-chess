@@ -52,7 +52,11 @@ void loop() {
       case WAIT_FOR_MOVE:
         if (board.m_first) {
           board.clearLCD();
-          board.print("UP = capture\nRIGHT = move\n");
+          if (board.hasCaptured()) {
+            board.print("Capturing\n");
+          } else {
+            board.print("UP = capture\nRIGHT = move\n");
+          }
           board.m_first = false;
         }
         break;
@@ -64,6 +68,11 @@ void loop() {
         break;
 
       case READ_CAPTURE:
+        if (!board.hasCaptured()) {
+          board.readCapture();
+        }
+
+        board.changeState(WAIT_FOR_MOVE);
         break;
 
       case WAIT_FOR_SERVER:
@@ -111,7 +120,6 @@ void loop() {
             default:
               break;
           }
-          board.print(String("Opponent's move\n" + board.getLastOppMove() + "\n"));
           board.m_first = false;
         }
 

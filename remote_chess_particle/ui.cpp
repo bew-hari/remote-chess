@@ -7,6 +7,9 @@ void setupButtonInterrupts(){
 
   pinMode(nextPin, INPUT_PULLDOWN);
   attachInterrupt(nextPin, nextButton, RISING);
+
+  pinMode(downPin, INPUT_PULLDOWN);
+  attachInterrupt(downPin, downButton, RISING);
 }
 
 void upButton() {
@@ -28,29 +31,33 @@ void upButton() {
   }
 }
 
-static State savedState;
 void nextButton() {
-
-  savedState = board.state();
-
-  if (board.state() != DEBUG_SENSORS) {
-    board.changeState(DEBUG_SENSORS);
-  } else {
-    board.changeState(savedState);
-  }
-
-  /*
   switch(board.state()) {
     case START:
       board.changeState(WAIT_FOR_GAME);
       break;
 
     case WAIT_FOR_MOVE:
-      board.changeState(READ_MOVE);
+      board.changeState(READ_CAPTURE);
+      break;
+
+    case GAME_OVER:
+      board.changeState(START);
       break;
 
     default:
       break;
   }
-  */
+}
+
+static State savedState;
+void downButton() {
+
+
+  if (board.state() != DEBUG_SENSORS) {
+    savedState = board.state();
+    board.changeState(DEBUG_SENSORS);
+  } else {
+    board.changeState(savedState);
+  }
 }

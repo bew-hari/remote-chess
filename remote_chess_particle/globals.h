@@ -13,5 +13,6 @@ extern int dataPin;
 
 extern int upPin;
 extern int nextPin;
+extern int downPin;
 
 #endif

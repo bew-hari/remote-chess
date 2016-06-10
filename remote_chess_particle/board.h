@@ -71,6 +71,8 @@ class Board {
     int getErrorCode();
     void setErrorCode(int error);
 
+    bool hasCaptured();
+    
     void clearLCD();
 
     void requestGame(int gameType);
