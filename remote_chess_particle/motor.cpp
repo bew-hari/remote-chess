@@ -44,9 +44,9 @@ int magOff(String cmd) {
 /* Function to toggle the step pin and trigger one step */
 void step() {
   digitalWrite(stp,HIGH);
-  delay(2);
+  delay(1);
   digitalWrite(stp,LOW);
-  delay(2);
+  delay(1);
 }
 
 /* Function to move a set number of steps in the X direction */

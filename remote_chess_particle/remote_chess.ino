@@ -102,12 +102,16 @@ void loop() {
           movePiece(board.getLastOppMove());
         }
 
-        delay(5000);
+        delay(1000);
 
-        if (board.isTurn()) {
-          board.changeState(WAIT_FOR_MOVE);
+        if (board.getGameOver()) {
+          board.changeState(GAME_OVER);
         } else {
-          board.changeState(WAIT_FOR_SERVER);
+          if (board.isTurn()) {
+            board.changeState(WAIT_FOR_MOVE);
+          } else {
+            board.changeState(WAIT_FOR_SERVER);
+          }
         }
         break;
 
