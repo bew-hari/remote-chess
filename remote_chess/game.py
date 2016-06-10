@@ -321,18 +321,6 @@ class Game(Resource):
           headers=headers
         )
 
-        # computer wins
-        command = '1'
-        headers = {'content-type': 'application/x-www-form-urlencoded'}
-        r = requests.post(
-          PARTICLE_URI + args['board_id'] + '/gameOver', 
-          data={
-            'access_token': PHOTON_ACCESS_TOKEN, 
-            'args': command
-          },
-          headers=headers
-        )
-
       else:
         # post AI move to player board
         to_move = ai_move.bestmove.uci()
